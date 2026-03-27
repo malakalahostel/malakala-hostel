@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { FaFilePdf, FaUsers, FaSpinner } from 'react-icons/fa';
 
 export default function AdminPanel() {
@@ -55,7 +55,7 @@ export default function AdminPanel() {
       tableRows.push(appData);
     });
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 45,
@@ -65,6 +65,44 @@ export default function AdminPanel() {
     });
 
     doc.save(`malakala_hostel_applicants_${new Date().getTime()}.pdf`);
+  };
+
+  const generateIndividualPDF = (app) => {
+    const doc = new jsPDF('portrait');
+    
+    doc.setFontSize(22);
+    doc.setTextColor(108, 99, 255);
+    doc.text('Malakala Hostel Application', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Applicant Details', 20, 40);
+
+    autoTable(doc, {
+      startY: 45,
+      theme: 'grid',
+      head: [['Field', 'Details']],
+      body: [
+        ['First Name', app.first_name],
+        ['Last Name', app.last_name],
+        ['Father Name', app.father_name],
+        ['Mother Name', app.mother_name],
+        ['Phone Number', app.phone_number],
+        ['Email Address', app.email],
+        ['Address', app.address],
+        ['SSLC Percentage', `${app.sslc_percentage}%`],
+        ['PUC Percentage', `${app.puc_percentage}%`],
+        ['Application Date', new Date(app.created_at).toLocaleDateString()]
+      ],
+      styles: { fontSize: 11, cellPadding: 5 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 50 },
+        1: { cellWidth: 130 }
+      },
+      headStyles: { fillColor: [108, 99, 255] }
+    });
+
+    doc.save(`Application_${app.first_name}_${app.last_name}.pdf`);
   };
 
   return (
@@ -108,19 +146,20 @@ export default function AdminPanel() {
                   <th className="py-4 px-6 font-semibold">SSLC / PUC</th>
                   <th className="py-4 px-6 font-semibold">Address</th>
                   <th className="py-4 px-6 font-semibold">Applied On</th>
+                  <th className="py-4 px-6 font-semibold text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-gray-500">
+                    <td colSpan="7" className="py-12 text-center text-gray-500">
                       <FaSpinner className="animate-spin text-primary text-3xl mx-auto mb-4" />
                       Loading applicants...
                     </td>
                   </tr>
                 ) : applicants.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-gray-500">
+                    <td colSpan="7" className="py-12 text-center text-gray-500">
                       No applications found.
                     </td>
                   </tr>
@@ -141,6 +180,15 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-4 px-6 text-gray-500 text-sm">
                         {new Date(app.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <button 
+                          onClick={() => generateIndividualPDF(app)}
+                          className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors group"
+                          title="Download Application PDF"
+                        >
+                          <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
+                        </button>
                       </td>
                     </tr>
                   ))
