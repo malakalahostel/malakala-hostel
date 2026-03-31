@@ -23,8 +23,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">Phone</h4>
-                  <p className="text-gray-600">Secretary Sujith: +91 7019591793</p>
-                  <p className="text-gray-600">Cashier Niroop K S: +91 9242841845</p>
+                  <p className="text-gray-600">Secretary Vishnu S O: +91 8217495728</p>
+                  <p className="text-gray-600">Cashier Raveesh Kalyani: +91 8431457138</p>
                 </div>
               </div>
 
