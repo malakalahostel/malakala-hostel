@@ -3,12 +3,21 @@ import cors from 'cors';
 import pkg from 'pg';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const { Pool } = pkg;
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -57,6 +66,44 @@ app.post('/api/applications', async (req, res) => {
        receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
        relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details]
     );
+
+    // Send Confirmation Email
+    try {
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        const mailOptions = {
+          from: `"Malakala Hostel" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: 'Application Submitted - Malakala Hostel',
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+              <h2 style="color: #6C63FF; text-align: center;">Application Received!</h2>
+              <p style="font-size: 16px;">Dear <strong>${applicant_name}</strong>,</p>
+              <p>Your official application for the Malakala Hostel has been successfully recorded in our database.</p>
+              
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="margin-top: 0;">Application Summary</h3>
+                <ul style="list-style-type: none; padding-left: 0; line-height: 1.6;">
+                  <li><strong>Applicant:</strong> ${applicant_name}</li>
+                  <li><strong>Guardian:</strong> ${guardian_name}</li>
+                  <li><strong>Expected College:</strong> ${expected_college}</li>
+                  <li><strong>Intended Course:</strong> ${course_intended}</li>
+                  <li><strong>Phone Number:</strong> ${phone_number}</li>
+                </ul>
+              </div>
+              
+              <p>Our trustees will review your application carefully. We will notify you directly regarding seat allotment and further procedures.</p>
+              <br/>
+              <p>Warm Regards,</p>
+              <p><strong>M. S. S. V. Dharmasamsthe<br/>Malakala Hostel Administration</strong></p>
+            </div>
+          `
+        };
+        await transporter.sendMail(mailOptions);
+      }
+    } catch (mailErr) {
+      console.error('Email failed to send:', mailErr.message);
+      // Failsafe: Application is still saved successfully even if email acts up
+    }
 
     res.status(201).json({ success: true, id: newApplicant.rows[0].id });
   } catch (err) {
