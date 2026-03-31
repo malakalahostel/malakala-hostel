@@ -22,16 +22,20 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// Create Application (Replacing get.php)
+// Create Application
 app.post('/api/applications', async (req, res) => {
   try {
     const { 
-      firstName, lastName, fathername, Mothername, Address, 
-      SSLC_Percentage, IIPUC_Percentage, email, password, number 
+      applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, 
+      course_intended, academic_history, hobbies, achievements, address, email, 
+      phone_number, password, 
+      receives_help, help_details, has_scholarship, scholarship_details,
+      old_border, old_border_details, relative_in_hostel, relative_details,
+      applied_other_hostel, other_hostel_details, contagious_disease, disease_details
     } = req.body;
 
     // Check if phone number already exists
-    const userCheck = await pool.query('SELECT * FROM applicants WHERE phone_number = $1 OR email = $2', [number, email]);
+    const userCheck = await pool.query('SELECT * FROM applicants WHERE phone_number = $1 OR email = $2', [phone_number, email]);
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ error: 'This Phone Number or Email already exists with us.' });
     }
@@ -43,9 +47,15 @@ app.post('/api/applications', async (req, res) => {
     // Insert into DB
     const newApplicant = await pool.query(
       `INSERT INTO applicants 
-        (first_name, last_name, father_name, mother_name, address, sslc_percentage, puc_percentage, email, password_hash, phone_number) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-      [firstName, lastName, fathername, Mothername, Address, SSLC_Percentage, IIPUC_Percentage, email, passwordHash, number]
+        (applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, 
+         academic_history, hobbies, achievements, address, email, phone_number, password_hash,
+         receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
+         relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) RETURNING id`,
+      [applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, 
+       JSON.stringify(academic_history), hobbies, achievements, address, email, phone_number, passwordHash,
+       receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
+       relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details]
     );
 
     res.status(201).json({ success: true, id: newApplicant.rows[0].id });
@@ -58,7 +68,7 @@ app.post('/api/applications', async (req, res) => {
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
   try {
-    const allApplicants = await pool.query('SELECT id, first_name, last_name, father_name, mother_name, address, sslc_percentage, puc_percentage, email, phone_number, created_at FROM applicants ORDER BY created_at DESC');
+    const allApplicants = await pool.query('SELECT id, applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, academic_history, hobbies, achievements, address, email, phone_number, receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details, relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details, created_at FROM applicants ORDER BY created_at DESC');
     res.json(allApplicants.rows);
   } catch (err) {
     console.error(err.message);
