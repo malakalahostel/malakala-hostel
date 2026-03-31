@@ -42,7 +42,7 @@ export default function ApplicationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const VITE_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

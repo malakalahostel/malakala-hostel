@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-
-// Pages
-import Home from './pages/Home';
-import Apply from './pages/Apply';
-import AdminPanel from './pages/AdminPanel';
+import Loader from './components/Loader';
+import AnimatedRoutes from './components/AnimatedRoutes';
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -22,14 +21,12 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-white flex flex-col transition-all">
+        {loading && <Loader onFinish={() => setLoading(false)} />}
+        
         <Navbar />
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/apply" element={<Apply />} />
-            <Route path="/admin" element={<AdminPanel />} />
-          </Routes>
+          <AnimatedRoutes />
         </main>
         <Footer />
       </div>
