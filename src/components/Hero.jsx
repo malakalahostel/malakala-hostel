@@ -23,7 +23,7 @@ export default function Hero() {
           A home away from home. Fostering education, discipline, and community since our founding by Malakala Shivaramaiah Shetty Venkatamma Charities.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <a href="#application" className="bg-primary hover:bg-white hover:text-primary text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg transform hover:-translate-y-1">
+          <a href="/apply" className="bg-primary hover:bg-white hover:text-primary text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg transform hover:-translate-y-1">
             Apply Now
           </a>
           <a href="#contact" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-8 py-3 rounded-full transition-all duration-300">
