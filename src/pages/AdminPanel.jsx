@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -239,6 +240,10 @@ export default function AdminPanel() {
 
   return (
     <div className="pt-24 min-h-screen bg-gray-50 pb-12">
+      <Helmet>
+        <title>Admin Dashboard | Malakala Hostel</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
