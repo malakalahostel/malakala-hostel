@@ -1,30 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FaFilePdf, FaUsers, FaSpinner } from 'react-icons/fa';
+import { FaFilePdf, FaUsers, FaSpinner, FaLock } from 'react-icons/fa';
 
 export default function AdminPanel() {
   const [applicants, setApplicants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminKey, setAdminKey] = useState('');
 
   const VITE_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.get(`${VITE_API_URL}/api/applications`);
-      setApplicants(res.data);
       setError('');
+      // Attempt to fetch data using the key
+      const res = await axios.get(`${VITE_API_URL}/api/applications`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      setApplicants(res.data);
+      setIsAuthenticated(true);
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch applications. Note: Ensure the PostgreSQL backend server is running.');
+      if (err.response && err.response.status === 401) {
+        setError('Incorrect Administrator Password.');
+      } else {
+        setError('Server error or database offline. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -237,6 +246,45 @@ export default function AdminPanel() {
 
     doc.save(`Application_${app.applicant_name}.pdf`);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="pt-24 min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Helmet>
+          <title>Admin Login | Malakala Hostel</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
+          <div className="bg-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FaLock className="text-primary text-3xl" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Restricted Access</h2>
+          <p className="text-gray-500 mb-8">Please enter the Administrator Password to view student applications.</p>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <input 
+                type="password" 
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                placeholder="Enter Master Password..." 
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-center text-lg tracking-widest"
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-transform flex justify-center items-center h-12"
+            >
+              {loading ? <FaSpinner className="animate-spin text-xl" /> : 'Unlock Dashboard'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24 min-h-screen bg-gray-50 pb-12">

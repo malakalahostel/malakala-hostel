@@ -114,6 +114,11 @@ app.post('/api/applications', async (req, res) => {
 
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
+  const masterKey = process.env.ADMIN_PASSWORD || 'malakala123';
+  if (req.headers['x-admin-key'] !== masterKey) {
+    return res.status(401).json({ error: 'Unauthorized access. Incorrect Master Password.' });
+  }
+
   try {
     const allApplicants = await pool.query('SELECT id, applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, academic_history, hobbies, achievements, address, email, phone_number, receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details, relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details, created_at FROM applicants ORDER BY created_at DESC');
     res.json(allApplicants.rows);
