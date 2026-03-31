@@ -15,7 +15,7 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto" data-aos="fade-up">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
           Welcome to <br className="md:hidden" />
           <span className="text-accent">Malakala Hostel</span>
         </h1>

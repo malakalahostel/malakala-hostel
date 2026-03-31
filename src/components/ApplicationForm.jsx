@@ -96,7 +96,7 @@ export default function ApplicationForm() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-5xl py-8" data-aos="fade-up">
-      <div className="bg-white rounded-3xl p-6 md:p-12 shadow-2xl">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-12 shadow-2xl">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Official Hostel Application</h2>
           <p className="text-gray-600">Please fill out the following comprehensive details carefully.</p>
