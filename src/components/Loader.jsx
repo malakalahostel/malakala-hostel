@@ -35,7 +35,7 @@ export default function Loader({ onFinish }) {
                 <Center>
                   <Text3D
                     font="https://threejs.org/examples/fonts/helvetiker_bold.typeface.json"
-                    size={2}
+                    size={1.5}
                     height={0.4}
                     curveSegments={12}
                     bevelEnabled
@@ -44,7 +44,7 @@ export default function Loader({ onFinish }) {
                     bevelOffset={0}
                     bevelSegments={5}
                   >
-                    M
+                    MH
                     <meshStandardMaterial color="#6C63FF" metalness={0.8} roughness={0.2} />
                   </Text3D>
                 </Center>
