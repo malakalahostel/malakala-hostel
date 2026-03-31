@@ -3,7 +3,7 @@ import React from 'react';
 export default function Events() {
   const events = [
     { title: "Independence Day", desc: "Celebrated on 15th August with flag hoisting and speeches.", img: "/images/ip.jpg" },
-    { title: "Ganesh Chathurthi", desc: "Celebrated grandly by keeping a Ganesh idol. Donors and old boarders are invited.", img: "/images/gan.jpg" },
+    { title: "Ganesh Chathurthi", desc: "Celebrated grandly by keeping a Ganesh idol. Donors and old boarders are invited.", img: "/images/gan.jpeg" },
     { title: "Republic Day", desc: "Celebrated on 26th Jan with free Eye/Dental checkups and blood donation camps.", img: "/images/republic.jpeg" },
     { title: "Hostel Day", desc: "A grand celebration at Malakala Convention Center with donors and past residents.", img: "/images/mal2.jpg" },
     { title: "Smriti & Macrito Finals", desc: "Annual sports tournament featuring outdoor cricket (Macrito) and indoor competitions like TT, Carrom, and Chess.", img: "/images/smriti.jpg" },
