@@ -6,9 +6,9 @@ export default function Events() {
     { title: "Ganesh Chathurthi", desc: "Celebrated grandly by keeping a Ganesh idol. Donors and old boarders are invited.", img: "/images/gan.jpeg" },
     { title: "Republic Day", desc: "Celebrated on 26th Jan with free Eye/Dental checkups and blood donation camps.", img: "/images/republic.jpeg" },
     { title: "Hostel Day", desc: "A grand celebration at Malakala Convention Center with donors and past residents.", img: "/images/mal2.jpg" },
-    { title: "Smriti & Macrito Finals", desc: "Annual sports tournament featuring outdoor cricket (Macrito) and indoor competitions like TT, Carrom, and Chess.", img: "/images/smriti.jpg" },
+    { title: "Smriti & Macrito ", desc: "Annual sports tournament featuring outdoor cricket (Macrito) and indoor competitions like TT, Carrom, and Chess.", img: "/images/smriti.jpg" },
     { title: "Sri Ram Navami", desc: "Grand celebration of Sri Ram Navami with auspicious prayers and cultural festivities.", img: "/images/ram (1).jpeg" },
-    { title: "Lakshmi Pooja", desc: "A traditional pooja performed within the hostel seeking blessings and prosperity.", img: "/images/lakshmi.jpeg" }
+    { title: "Lakshmi Satyanarayana Pooja", desc: "A traditional pooja performed within the hostel seeking blessings and prosperity.", img: "/images/lakshmi.jpeg" }
   ];
 
   return (
@@ -21,17 +21,17 @@ export default function Events() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((evt, idx) => (
-            <div 
-              key={idx} 
-              data-aos="fade-up" 
+            <div
+              key={idx}
+              data-aos="fade-up"
               data-aos-delay={idx * 100}
               className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 group"
             >
               <div className="h-48 overflow-hidden relative">
-                <img 
-                  src={evt.img} 
-                  alt={evt.title} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                <img
+                  src={evt.img}
+                  alt={evt.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   onError={(e) => { e.target.src = "https://via.placeholder.com/400x200?text=Event+Image" }}
                 />
                 <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
