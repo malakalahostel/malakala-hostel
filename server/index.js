@@ -40,7 +40,8 @@ app.post('/api/applications', async (req, res) => {
       phone_number, password, 
       receives_help, help_details, has_scholarship, scholarship_details,
       old_border, old_border_details, relative_in_hostel, relative_details,
-      applied_other_hostel, other_hostel_details, contagious_disease, disease_details
+      applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
+      utr_number
     } = req.body;
 
     // Check if phone number already exists
@@ -59,13 +60,17 @@ app.post('/api/applications', async (req, res) => {
         (applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, 
          academic_history, hobbies, achievements, address, email, phone_number, password_hash,
          receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
-         relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) RETURNING id`,
+         relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
+         payment_id, payment_status) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29) RETURNING id`,
       [applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, 
        JSON.stringify(academic_history), hobbies, achievements, address, email, phone_number, passwordHash,
        receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
-       relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details]
+       relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
+       null, 'not_required']
     );
+
+    const applicationId = newApplicant.rows[0].id;
 
     // Send Confirmation Email
     try {
@@ -73,12 +78,12 @@ app.post('/api/applications', async (req, res) => {
         const mailOptions = {
           from: `"Malakala Hostel" <${process.env.EMAIL_USER}>`,
           to: email,
-          subject: 'Application Submitted - Malakala Hostel',
+          subject: 'Application Submitted & Payment Pending Verification - Malakala Hostel',
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
               <h2 style="color: #6C63FF; text-align: center;">Application Received!</h2>
               <p style="font-size: 16px;">Dear <strong>${applicant_name}</strong>,</p>
-              <p>Your official application for the Malakala Hostel has been successfully recorded in our database.</p>
+              <p>Your official application for the Malakala Hostel has been successfully recorded.</p>
               
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Application Summary</h3>
@@ -91,7 +96,7 @@ app.post('/api/applications', async (req, res) => {
                 </ul>
               </div>
               
-              <p>Our trustees will review your application carefully. We will notify you directly regarding seat allotment and further procedures.</p>
+              <p>Our trustees will review your application. We will notify you directly regarding seat allotment and further procedures.</p>
               <br/>
               <p>Warm Regards,</p>
               <p><strong>M. S. S. V. Dharmasamsthe<br/>Malakala Hostel Administration</strong></p>
@@ -102,10 +107,12 @@ app.post('/api/applications', async (req, res) => {
       }
     } catch (mailErr) {
       console.error('Email failed to send:', mailErr.message);
-      // Failsafe: Application is still saved successfully even if email acts up
     }
 
-    res.status(201).json({ success: true, id: newApplicant.rows[0].id });
+    res.status(201).json({ 
+      success: true, 
+      id: applicationId
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'Server error while processing application' });
@@ -120,7 +127,7 @@ app.get('/api/applications', async (req, res) => {
   }
 
   try {
-    const allApplicants = await pool.query('SELECT id, applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, academic_history, hobbies, achievements, address, email, phone_number, receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details, relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details, created_at FROM applicants ORDER BY created_at DESC');
+    const allApplicants = await pool.query('SELECT id, applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, academic_history, hobbies, achievements, address, email, phone_number, receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details, relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details, payment_status, payment_id, created_at FROM applicants ORDER BY created_at DESC');
     res.json(allApplicants.rows);
   } catch (err) {
     console.error(err.message);

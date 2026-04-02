@@ -336,14 +336,14 @@ export default function AdminPanel() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-gray-500">
+                    <td colSpan="7" className="py-12 text-center text-gray-500">
                       <FaSpinner className="animate-spin text-primary text-3xl mx-auto mb-4" />
                       Loading applicants...
                     </td>
                   </tr>
                 ) : applicants.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-gray-500">
+                    <td colSpan="7" className="py-12 text-center text-gray-500">
                       No applications found.
                     </td>
                   </tr>

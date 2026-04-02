@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 mt-8 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Malakala Hostel by Malakala Shivaramaiah Shetty Venkatamma Charities. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Malakala Hostel by Malakala Shivaramaiah Setty Venkatamma Dharmasamsthe. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

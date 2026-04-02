@@ -72,8 +72,10 @@ export default function ApplicationForm() {
     setError('');
 
     try {
-      await axios.post(`${VITE_API_URL}/api/applications`, formData);
-      setSubmitted(true);
+      const res = await axios.post(`${VITE_API_URL}/api/applications`, formData);
+      if (res.data.success) {
+        setSubmitted(true);
+      }
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Failed to submit application. Please try again.');
@@ -99,7 +101,21 @@ export default function ApplicationForm() {
       <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-12 shadow-2xl">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Official Hostel Application</h2>
-          <p className="text-gray-600">Please fill out the following comprehensive details carefully.</p>
+          <p className="text-gray-600 mb-8">Please fill out the following comprehensive details carefully.</p>
+          
+          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-6 text-left max-w-3xl mx-auto shadow-sm">
+            <h3 className="text-lg font-bold text-primary mb-3 flex items-center">
+              <span className="bg-blue-100 text-blue-600 p-1.5 rounded mr-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </span>
+              Eligibility Criteria
+            </h3>
+            <ul className="list-disc pl-11 space-y-2 text-sm text-gray-700">
+              <li>Admission is strictly provided only to students above the 2nd PUC academic level.</li>
+              <li>Priority admission is granted to economically weaker students who have secured a high academic percentage.</li>
+              <li>Eligible applicants must be pursuing a degree from Bangalore University, or other recognized deemed universities, located specifically within Bangalore City limits.</li>
+            </ul>
+          </div>
         </div>
 
         {error && (
