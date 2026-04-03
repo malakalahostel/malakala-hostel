@@ -5,9 +5,9 @@ export default function Hero() {
     <section id="home" className="relative h-screen flex items-center justify-center">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="/images/mal1.jpg" 
-          alt="Malakala Hostel" 
+        <img
+          src="/images/mal1.jpg"
+          alt="Malakala Hostel"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/60"></div>
@@ -20,7 +20,8 @@ export default function Hero() {
           <span className="text-accent">Malakala Hostel</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto">
-          A home away from home. Fostering education, discipline, and community founded by Malakala Shivaramaiah Setty Venkatamma Dharmasamsthe.
+          "A home away from home." </p>
+        <p>For providing residential accomidation and food arrangments to the needy students coming from outside banglore City and helping them for further education by Malakala Shivaramaiah Setty Venkatamma  and their sons.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <a href="/apply" className="bg-primary hover:bg-white hover:text-primary text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg transform hover:-translate-y-1">

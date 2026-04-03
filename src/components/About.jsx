@@ -21,7 +21,7 @@ export default function About() {
           <div data-aos="fade-left" className="space-y-6">
             <h3 className="text-2xl font-semibold text-gray-800">Our Heritage</h3>
             <p className="text-gray-600 leading-relaxed">
-              Malakala Hostel is proudly founded and  Managed by  by the 'Malakala Shivaramaiah Setty Venkatamma Dharmasamsthe'. Since 1956 (Now and earlier)We are dedicated to providing a supportive, secure, and nurturing environment for students pursuing their academic dreams.
+              Malakala Hostel is proudly founded and  Managed by  the family members of  Malakala Shivaramaiah Setty Venkatamma . Since 1956 We are dedicated to providing a supportive, secure, and nurturing environment for students pursuing their academic dreams.
             </p>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function About() {
           </div>
 
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition-shadow">
-            <h4 className="font-bold text-primary mb-4 text-center text-lg border-b pb-2">Trustees</h4>
+            <h4 className="font-bold text-primary mb-4 text-center text-lg border-b pb-2">Present Trustees</h4>
             <ul className="text-sm text-gray-700 space-y-2 text-center">
               <li>Sri M.A Jayaprakash</li>
               <li>Sri M.S Sathyanarayana Setty</li>

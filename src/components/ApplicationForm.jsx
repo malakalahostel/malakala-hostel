@@ -37,7 +37,7 @@ export default function ApplicationForm() {
     disease_details: '',
     agreed_to_terms: false
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -102,7 +102,7 @@ export default function ApplicationForm() {
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Official Hostel Application</h2>
           <p className="text-gray-600 mb-8">Please fill out the following comprehensive details carefully.</p>
-          
+
           <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-6 text-left max-w-3xl mx-auto shadow-sm">
             <h3 className="text-lg font-bold text-primary mb-3 flex items-center">
               <span className="bg-blue-100 text-blue-600 p-1.5 rounded mr-2">
@@ -111,8 +111,8 @@ export default function ApplicationForm() {
               Eligibility Criteria
             </h3>
             <ul className="list-disc pl-11 space-y-2 text-sm text-gray-700">
-              <li>Admission is strictly provided only to students above the 2nd PUC academic level.</li>
-              <li>Priority admission is granted to economically weaker students who have secured a high academic percentage.</li>
+              <li>Admission is strictly provided only to students after the 2nd PUC academic level.</li>
+              <li>Priority admission is granted to economically weaker students and those students who have secured a high academic percentage.</li>
               <li>Eligible applicants must be pursuing a degree from Bangalore University, or other recognized deemed universities, located specifically within Bangalore City limits.</li>
             </ul>
           </div>
@@ -125,7 +125,7 @@ export default function ApplicationForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          
+
           {/* SECTION 1: Personal Details */}
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
             <h3 className="text-xl font-semibold mb-6 border-b pb-2 text-primary">1. Personal Information</h3>
@@ -214,7 +214,7 @@ export default function ApplicationForm() {
                 </tbody>
               </table>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-6 mt-8">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Hobbies</label>
@@ -230,7 +230,7 @@ export default function ApplicationForm() {
           {/* SECTION 3: Additional Questionnaire */}
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
             <h3 className="text-xl font-semibold mb-6 border-b pb-2 text-primary">3. Additional Details</h3>
-            
+
             <div className="space-y-6">
               {/* Q1 */}
               <div>
@@ -301,12 +301,11 @@ export default function ApplicationForm() {
             <p className="text-gray-700 mb-4">Father/Guardian of the applicant and the applicant request you to allot a:</p>
             <ol className="list-decimal pl-6 space-y-3 text-gray-700 text-sm mb-6">
               <li>Seat to the applicant in your Hostel for this academic year.</li>
-              <li>We assure you that the applicant will abide by all the rules and regulations of the Hostel that are in force or that may come into force.</li>
-              <li>We hear by solemnly declare that the information furnished by us in the application is true to the best of our knowledge and information.</li>
-              <li>We know that if any information is furnished by us in the application is found to be untrue, I am prepared to indemnify MSSV Dharmasamsthe, and I shall reimburse all the amounts spent on applicant together with interest there on @21% per annum, also pay damages determined by the trustees and the trustees will be entitled to recover the same either jointly or severally from us.</li>
+              <li>I assure you that the applicant will abide by all the rules and regulations of the Hostel that are in force or that may come into force.</li>
+              <li>I hereby solemnly declare that the information furnished by us in the application is true to the best of our knowledge and information.</li>
               <li>I also know that the applicant will be dismissed by you for the breach of faith and to the Rules and Regulations of the Hostel.</li>
             </ol>
-            
+
             <div className="flex items-start bg-blue-50 p-4 rounded-xl border border-blue-100">
               <input type="checkbox" name="agreed_to_terms" checked={formData.agreed_to_terms} onChange={handleChange} required id="terms" className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary mt-0.5" />
               <label htmlFor="terms" className="ml-3 text-sm font-medium text-gray-800">
