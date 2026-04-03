@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "render-build": "npm install --include=dev && npm run build && cd server && npm install",
-    "render-start": "cd server && npm start"
+    "render-start": "cd server && node migrate.js && npm start"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
