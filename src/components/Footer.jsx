@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-12 mb-12">
-          
+
           <div>
             <h2 className="text-2xl font-bold mb-4 text-primary">Malkala Hostel</h2>
             <p className="text-gray-400 mb-6 leading-relaxed">
@@ -20,7 +20,6 @@ export default function Footer() {
               <li><a href="#about" className="text-gray-400 hover:text-white transition-colors">About</a></li>
               <li><a href="#facilities" className="text-gray-400 hover:text-white transition-colors">Facilities</a></li>
               <li><a href="#events" className="text-gray-400 hover:text-white transition-colors">Events</a></li>
-              <li><a href="https://forms.infinityfreeapp.com/print.html" className="text-gray-400 hover:text-white transition-colors" target="_blank" rel="noreferrer">Acknowledgement</a></li>
             </ul>
           </div>
         </div>
