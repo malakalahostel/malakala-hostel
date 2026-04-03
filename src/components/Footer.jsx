@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function Footer() {
   return (
@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 gap-12 mb-12">
           
           <div>
-            <h2 className="text-2xl font-bold mb-4 text-primary">Malakala Hostel</h2>
+            <h2 className="text-2xl font-bold mb-4 text-primary">Malkala Hostel</h2>
             <p className="text-gray-400 mb-6 leading-relaxed">
               Serving the community since 1956. Fostering education, discipline, and community through our well-equipped hostel facilities.
             </p>
@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 mt-8 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Malakala Hostel by Malakala Shivaramaiah Setty Venkatamma Dharmasamsthe. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Malkala Hostel by Malkala Shivaramaiah Setty Venkatamma Dharmasamsthe. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

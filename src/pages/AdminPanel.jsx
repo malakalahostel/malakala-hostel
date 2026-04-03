@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import jsPDF from 'jspdf';
@@ -43,7 +43,7 @@ export default function AdminPanel() {
     const doc = new jsPDF('landscape');
     
     doc.setFontSize(18);
-    doc.text('Malakala Hostel - Applicants Report', 14, 22);
+    doc.text('Malkala Hostel - Applicants Report', 14, 22);
     
     doc.setFontSize(11);
     doc.text(`Total Applications: ${applicants.length}`, 14, 30);
@@ -74,7 +74,7 @@ export default function AdminPanel() {
       headStyles: { fillColor: [108, 99, 255] }
     });
 
-    doc.save(`malakala_hostel_applicants_${new Date().getTime()}.pdf`);
+    doc.save(`malkala_hostel_applicants_${new Date().getTime()}.pdf`);
   };
 
   const generateIndividualPDF = (app) => {
@@ -83,7 +83,7 @@ export default function AdminPanel() {
     // --- PAGE 1: APPLICANT DETAILS ---
     doc.setFontSize(22);
     doc.setTextColor(108, 99, 255);
-    doc.text('Malakala Hostel', 105, 20, { align: 'center' });
+    doc.text('Malkala Hostel', 105, 20, { align: 'center' });
     
     doc.setFontSize(14);
     doc.setTextColor(100, 100, 100);
@@ -251,7 +251,7 @@ export default function AdminPanel() {
     return (
       <div className="pt-24 min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Helmet>
-          <title>Admin Login | Malakala Hostel</title>
+          <title>Admin Login | Malkala Hostel</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
@@ -289,7 +289,7 @@ export default function AdminPanel() {
   return (
     <div className="pt-24 min-h-screen bg-gray-50 pb-12">
       <Helmet>
-        <title>Admin Dashboard | Malakala Hostel</title>
+        <title>Admin Dashboard | Malkala Hostel</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="container mx-auto px-6 max-w-7xl">

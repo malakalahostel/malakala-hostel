@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { Center, Text3D, Float, Environment } from '@react-three/drei';
@@ -95,7 +95,7 @@ export default function Loader({ onFinish }) {
               transition={{ duration: 1 }}
               className="text-white text-3xl font-bold tracking-[0.3em] flex items-center flex-col uppercase font-sans"
             >
-              Malakala Hostel
+              Malkala Hostel
               
               <div className="h-16 mt-8 flex items-center justify-center overflow-visible">
                 <AnimatePresence mode="wait">

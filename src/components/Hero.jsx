@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function Hero() {
   return (
@@ -7,7 +7,7 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         <img
           src="/images/mal1.jpg"
-          alt="Malakala Hostel"
+          alt="Malkala Hostel"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/60"></div>
@@ -17,11 +17,13 @@ export default function Hero() {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto" data-aos="fade-up">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
           Welcome to <br className="md:hidden" />
-          <span className="text-accent">Malakala Hostel</span>
+          <span className="text-accent">Malkala Hostel</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto">
-          "A home away from home." </p>
-        <p>For providing residential accomidation and food arrangments to the needy students coming from outside banglore City and helping them for further education by Malakala Shivaramaiah Setty Venkatamma  and their sons.
+        <p className="text-lg md:text-xl text-gray-200 mb-4 max-w-2xl mx-auto">
+          "A home away from home."
+        </p>
+        <p className="text-sm md:text-base text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+          For providing residential accommodation and food arrangements to the needy students coming from outside Bangalore City and helping them for further education by Malkala Shivaramaiah Setty Venkatamma and their sons.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <a href="/apply" className="bg-primary hover:bg-white hover:text-primary text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg transform hover:-translate-y-1">

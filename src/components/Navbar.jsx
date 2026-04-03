@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 export default function Navbar() {
@@ -26,7 +26,7 @@ export default function Navbar() {
     <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <a href="/#home" className={`text-2xl font-bold transition-colors ${scrolled ? 'text-primary' : 'text-primary md:text-white'}`}>
-          Malakala Hostel
+          Malkala Hostel
         </a>
 
         {/* Desktop Menu */}

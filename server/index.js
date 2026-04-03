@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import pkg from 'pg';
 import dotenv from 'dotenv';
@@ -76,14 +76,14 @@ app.post('/api/applications', async (req, res) => {
     try {
       if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         const mailOptions = {
-          from: `"Malakala Hostel" <${process.env.EMAIL_USER}>`,
+          from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
           to: email,
-          subject: 'Application Submitted & Payment Pending Verification - Malakala Hostel',
+          subject: 'Application Submitted & Payment Pending Verification - Malkala Hostel',
           html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
               <h2 style="color: #6C63FF; text-align: center;">Application Received!</h2>
               <p style="font-size: 16px;">Dear <strong>${applicant_name}</strong>,</p>
-              <p>Your official application for the Malakala Hostel has been successfully recorded.</p>
+              <p>Your official application for the Malkala Hostel has been successfully recorded.</p>
               
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3 style="margin-top: 0;">Application Summary</h3>
@@ -99,7 +99,7 @@ app.post('/api/applications', async (req, res) => {
               <p>Our trustees will review your application. We will notify you directly regarding seat allotment and further procedures.</p>
               <br/>
               <p>Warm Regards,</p>
-              <p><strong>M. S. S. V. Dharmasamsthe<br/>Malakala Hostel Administration</strong></p>
+              <p><strong>M. S. S. V. Dharmasamsthe<br/>Malkala Hostel Administration</strong></p>
             </div>
           `
         };
@@ -121,7 +121,7 @@ app.post('/api/applications', async (req, res) => {
 
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
-  const masterKey = process.env.ADMIN_PASSWORD || 'malakala123';
+  const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
   if (req.headers['x-admin-key'] !== masterKey) {
     return res.status(401).json({ error: 'Unauthorized access. Incorrect Master Password.' });
   }

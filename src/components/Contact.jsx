@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 export default function Contact() {
@@ -34,7 +34,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">Email</h4>
-                  <p className="text-gray-600"><a href="mailto:malakalahostel1956@gmail.com" className="hover:text-primary transition-colors">malakalahostel1956@gmail.com</a></p>
+                  <p className="text-gray-600"><a href="mailto:malkalahostel1956@gmail.com" className="hover:text-primary transition-colors">malkalahostel1956@gmail.com</a></p>
                 </div>
               </div>
 
@@ -60,7 +60,7 @@ export default function Contact() {
               allowFullScreen="" 
               loading="lazy" 
               referrerPolicy="no-referrer-when-downgrade"
-              title="Malakala Hostel Location"
+              title="Malkala Hostel Location"
             ></iframe>
           </div>
         </div>
