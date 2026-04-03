@@ -1,10 +1,11 @@
-﻿import express from 'express';
+import express from 'express';
 import cors from 'cors';
 import pkg from 'pg';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import path from 'path';
+import { generateApplicationPDF } from './pdfGenerator.js';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -80,28 +81,73 @@ app.post('/api/applications', async (req, res) => {
           to: email,
           subject: 'Application Submitted & Payment Pending Verification - Malkala Hostel',
           html: `
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
-              <h2 style="color: #6C63FF; text-align: center;">Application Received!</h2>
-              <p style="font-size: 16px;">Dear <strong>${applicant_name}</strong>,</p>
-              <p>Your official application for the Malkala Hostel has been successfully recorded.</p>
-              
-              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Application Summary</h3>
-                <ul style="list-style-type: none; padding-left: 0; line-height: 1.6;">
-                  <li><strong>Applicant:</strong> ${applicant_name}</li>
-                  <li><strong>Guardian:</strong> ${guardian_name}</li>
-                  <li><strong>Expected College:</strong> ${expected_college}</li>
-                  <li><strong>Intended Course:</strong> ${course_intended}</li>
-                  <li><strong>Phone Number:</strong> ${phone_number}</li>
-                </ul>
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; margin: 0; text-align: center;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px;">MALAKALA HOSTEL</h1>
+                  <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 14px;">M. S. S. V. Dharmasamsthe</p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 40px 30px;">
+                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Application Received! 🎉</h2>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    Dear <strong style="color: #1e293b;">${applicant_name}</strong>,<br><br>
+                    Thank you for choosing Malakala Hostel. Your official application has been successfully recorded within our system. Our trustees will review your details shortly.
+                  </p>
+
+                  <!-- Details Card -->
+                  <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                    <h3 style="color: #0f172a; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Application Summary</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-weight: 500; width: 40%;">Applicant:</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${applicant_name}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Guardian Name:</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${guardian_name}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Expected College:</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${expected_college}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Intended Course:</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${course_intended}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Phone Number:</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${phone_number}</td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                    We will notify you directly regarding the next steps, including seat allotment procedures. If you have any questions, feel free to contact the administration.
+                  </p>
+
+                </div>
+
+                <!-- Footer -->
+                <div style="background-color: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+                  <p style="margin: 0; color: #64748b; font-size: 13px;">
+                    <strong>Malakala Hostel Administration</strong><br>
+                    Bengaluru-560019
+                  </p>
+                </div>
+
               </div>
-              
-              <p>Our trustees will review your application. We will notify you directly regarding seat allotment and further procedures.</p>
-              <br/>
-              <p>Warm Regards,</p>
-              <p><strong>M. S. S. V. Dharmasamsthe<br/>Malkala Hostel Administration</strong></p>
             </div>
-          `
+          `,
+          attachments: [
+            {
+              filename: `Application_${applicant_name.replace(/\s+/g, '_')}.pdf`,
+              content: generateApplicationPDF(req.body)
+            }
+          ]
         };
         await transporter.sendMail(mailOptions);
       }
