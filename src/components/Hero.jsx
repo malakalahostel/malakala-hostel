@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export default function Hero() {
   return (
@@ -19,11 +19,8 @@ export default function Hero() {
           Welcome to <br className="md:hidden" />
           <span className="text-accent">Malkala Hostel</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-200 mb-4 max-w-2xl mx-auto">
-          "A home away from home."
-        </p>
-        <p className="text-sm md:text-base text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-          For providing residential accommodation and food arrangements to the needy students coming from outside Bangalore City and helping them for further education by Malkala Shivaramaiah Setty Venkatamma and their sons.
+        <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto">
+          A home away from home. Fostering education, discipline, and community founded by Malkala Shivaramaiah Setty Venkatamma Dharmasamsthe.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <a href="/apply" className="bg-primary hover:bg-white hover:text-primary text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg transform hover:-translate-y-1">

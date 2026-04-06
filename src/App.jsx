@@ -27,6 +27,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-white flex flex-col transition-all">
         {loading && <Loader onFinish={handleFinishLoading} />}
+        
         <Navbar />
         <main className="flex-grow">
           <AnimatedRoutes />

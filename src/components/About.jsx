@@ -49,13 +49,10 @@ export default function About() {
         {/* Donors & Trustees Section */}
         <div className="mt-16 grid md:grid-cols-3 gap-8" data-aos="fade-up">
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition-shadow">
-            <h4 className="font-bold text-primary mb-4 text-center text-lg border-b pb-2">Donors</h4>
+            <h4 className="font-bold text-primary mb-4 text-center text-lg border-b pb-2">Founders</h4>
             <ul className="text-sm text-gray-700 space-y-2 text-center">
               <li>Sri Malkala Shivaramaiah Setty</li>
               <li>Smt.Venkatamma</li>
-              <li>Sri Malkala Ramachandra Setty</li>
-              <li>Sri Malkala Ayodhyaramaiah Setty</li>
-              <li>Sri Malkala Dasaratharama Setty</li>
             </ul>
           </div>
 
@@ -70,6 +67,9 @@ export default function About() {
               <li>Sri Malkala Ramlakshman</li>
               <li>Sri Malkala Kashiviswanath Setty</li>
               <li>Sri Malkala Jayaram</li>
+              <li>Sri Malkala Ramachandra Setty</li>
+              <li>Sri Malkala Ayodhyaramaiah Setty</li>
+              <li>Sri Malkala Dasaratharama Setty</li>
             </ul>
           </div>
 
