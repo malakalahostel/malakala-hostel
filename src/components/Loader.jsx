@@ -155,7 +155,7 @@ export default function Loader({ onFinish }) {
                       className="px-10 py-4 bg-primary text-white rounded-md font-bold tracking-[0.2em] border border-primary/50 shadow-2xl shadow-primary/40 transition-colors cursor-pointer relative overflow-hidden"
                     >
                       <motion.div 
-                        className="absolute inset-0 bg-white/30"
+                        className="absolute inset-0 bg-black/30"
                         initial={{ x: "-100%" }}
                         animate={{ x: "200%" }}
                         transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}

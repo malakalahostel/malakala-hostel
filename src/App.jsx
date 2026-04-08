@@ -25,7 +25,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-white flex flex-col transition-all">
+      <div className="min-h-screen flex flex-col transition-all relative">
         {loading && <Loader onFinish={handleFinishLoading} />}
         
         <Navbar />

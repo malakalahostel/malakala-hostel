@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export default function Events() {
   const events = [
@@ -12,10 +12,10 @@ export default function Events() {
   ];
 
   return (
-    <section id="events" className="py-20 bg-gray-50">
+    <section id="events" className="py-20 relative">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16" data-aos="fade-up">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Events</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4 drop-shadow-md">Our Events</h2>
           <div className="h-1 w-20 bg-primary mx-auto rounded"></div>
         </div>
 
@@ -25,7 +25,7 @@ export default function Events() {
               key={idx} 
               data-aos="fade-up" 
               data-aos-delay={idx * 100}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 group"
+              className="glass rounded-2xl overflow-hidden hover-glow transition-all duration-300 group"
             >
               <div className="h-48 overflow-hidden relative">
                 <img 
@@ -34,11 +34,11 @@ export default function Events() {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   onError={(e) => { e.target.src = "https://via.placeholder.com/400x200?text=Event+Image" }}
                 />
-                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{evt.title}</h3>
-                <p className="text-gray-600 text-sm">{evt.desc}</p>
+                <h3 className="text-xl font-bold text-secondary mb-3">{evt.title}</h3>
+                <p className="text-gray-300 text-sm">{evt.desc}</p>
               </div>
             </div>
           ))}

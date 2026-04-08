@@ -1,15 +1,61 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6C63FF;
-  --color-secondary: #F5F5F5;
-  --color-accent: #FF6584;
+  --color-primary: #E52D27;   /* RCB Red */
+  --color-secondary: #D4AF37; /* RCB Gold */
+  --color-accent: #CFB53B;    /* Bright Gold */
+  --color-dark: #000000;      /* Pure Black Base */
 }
 
 body {
-  background-color: var(--color-secondary);
-  color: #1f2937;
+  background-color: var(--color-dark);
+  color: #dfdfdf;
   font-family: 'Inter', 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(15, 15, 15, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.2); /* RCB Gold border */
+  box-shadow: 0 8px 32px 0 rgba(229, 45, 39, 0.15); /* Red tinted shadow */
+}
+
+.glass-red {
+  background: rgba(229, 45, 39, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 45, 39, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(229, 45, 39, 0.2);
+}
+
+.glass-header {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 2px solid rgba(229, 45, 39, 0.8); /* Strong RCB border */
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.2); }
+}
+
+.hover-glow:hover {
+  animation: glow 1.5s infinite alternate;
 }

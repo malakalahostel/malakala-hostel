@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Home from '../pages/Home';
 import Apply from '../pages/Apply';
 import AdminPanel from '../pages/AdminPanel';
+import ApplicantDashboard from '../pages/ApplicantDashboard';
 
 export default function AnimatedRoutes() {
   const location = useLocation();
@@ -35,8 +36,13 @@ export default function AnimatedRoutes() {
           </motion.div>
         } />
         <Route path="/admin" element={
-          <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageTransition} className="bg-white">
+          <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageTransition}>
             <AdminPanel />
+          </motion.div>
+        } />
+        <Route path="/login" element={
+          <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageTransition}>
+            <ApplicantDashboard />
           </motion.div>
         } />
       </Routes>

@@ -27,55 +27,55 @@ export default function Contact() {
   }, [VITE_API_URL]);
 
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section id="contact" className="py-20 relative">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16" data-aos="fade-up">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Contact Us</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4 drop-shadow-md">Contact Us</h2>
           <div className="h-1 w-20 bg-primary mx-auto rounded"></div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Info */}
           <div className="space-y-8" data-aos="fade-right">
-            <h3 className="text-2xl font-bold text-gray-800">Get in Touch</h3>
-            <p className="text-gray-600">We are here to help and answer any questions you might have. We look forward to hearing from you.</p>
+            <h3 className="text-2xl font-bold text-white">Get in Touch</h3>
+            <p className="text-gray-300">We are here to help and answer any questions you might have. We look forward to hearing from you.</p>
             
             <div className="space-y-6 mt-8">
               <div className="flex items-start space-x-4">
-                <div className="bg-blue-50 p-3 rounded-full text-primary">
+                <div className="glass p-3 rounded-full text-secondary">
                   <FaPhoneAlt size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900">Phone</h4>
-                  <p className="text-gray-600">Secretary {settings.secretary_name}: {settings.secretary_phone}</p>
-                  <p className="text-gray-600">Cashier {settings.cashier_name}: {settings.cashier_phone}</p>
+                  <h4 className="font-bold text-secondary">Phone</h4>
+                  <p className="text-gray-300">Secretary {settings.secretary_name}: {settings.secretary_phone}</p>
+                  <p className="text-gray-300">Cashier {settings.cashier_name}: {settings.cashier_phone}</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-blue-50 p-3 rounded-full text-primary">
+                <div className="glass p-3 rounded-full text-secondary">
                   <FaEnvelope size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900">Email</h4>
-                  <p className="text-gray-600"><a href="mailto:malkalahostel1956@gmail.com" className="hover:text-primary transition-colors">malkalahostel1956@gmail.com</a></p>
+                  <h4 className="font-bold text-secondary">Email</h4>
+                  <p className="text-gray-300"><a href="mailto:malkalahostel1956@gmail.com" className="hover:text-primary transition-colors">malkalahostel1956@gmail.com</a></p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-blue-50 p-3 rounded-full text-primary">
+                <div className="glass p-3 rounded-full text-secondary">
                   <FaMapMarkerAlt size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900">Address</h4>
-                  <p className="text-gray-600">#2, 3rd cross, Gavipuram extension,<br/>Basavangudi, Bengaluru-560019</p>
+                  <h4 className="font-bold text-secondary">Address</h4>
+                  <p className="text-gray-300">#2, 3rd cross, Gavipuram extension,<br/>Basavangudi, Bengaluru-560019</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Map */}
-          <div className="h-[400px] bg-gray-200 rounded-2xl overflow-hidden shadow-lg border border-gray-100 placeholder-map" data-aos="fade-left">
+          <div className="h-[400px] glass rounded-2xl overflow-hidden shadow-lg border border-gray-800 placeholder-map hover-glow" data-aos="fade-left">
             <iframe 
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.384666065538!2d77.56708781482811!3d12.947231490870933!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae15edf5aab6ab%3A0xe54d9229fcaad7d!2sGavipuram%20Extention%2C%20Kempegowda%20Nagar%2C%20Bengaluru%2C%20Karnataka%20560019!5e0!3m2!1sen!2sin!4v1683238914104!5m2!1sen!2sin" 
               width="100%" 

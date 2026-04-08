@@ -165,6 +165,37 @@ app.post('/api/applications', async (req, res) => {
   }
 });
 
+
+// Applicant Authentication
+app.post('/api/auth/applicant', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and Password are required.' });
+    }
+
+    const { rows } = await pool.query('SELECT * FROM applicants WHERE email = ', [email]);
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials. Record not found.' });
+    }
+
+    const applicant = rows[0];
+    const isMatch = await bcrypt.compare(password, applicant.password_hash);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials. Incorrect password.' });
+    }
+
+    // Remove password hash before sending back
+    delete applicant.password_hash;
+    
+    res.json({ success: true, applicant });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    res.status(500).json({ error: 'Server error while authenticating' });
+  }
+});
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
   const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
