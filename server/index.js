@@ -181,6 +181,85 @@ app.get('/api/applications', async (req, res) => {
   }
 });
 
+// Admin Panel Delete Application
+app.delete('/api/applications/:id', async (req, res) => {
+  const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
+  if (req.headers['x-admin-key'] !== masterKey) {
+    return res.status(401).json({ error: 'Unauthorized access.' });
+  }
+
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM applicants WHERE id = $1', [id]);
+    res.json({ success: true, message: 'Application deleted successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error while deleting application' });
+  }
+});
+
+// Get Settings (Dynamic Secretary and Cashier Details)
+app.get('/api/settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT key, value FROM settings');
+    const settings = {};
+    result.rows.forEach(row => settings[row.key] = row.value);
+    
+    // Default values if empty
+    if (Object.keys(settings).length === 0) {
+      return res.json({
+        secretary_name: 'Vishnu S O',
+        secretary_phone: '+91 8217495728',
+        cashier_name: 'Raveesh Kalyani',
+        cashier_phone: '+91 8431457138'
+      });
+    }
+    res.json(settings);
+  } catch (err) {
+    if (err.code === '42P01') { // table doesn't exist
+      try {
+        await pool.query('CREATE TABLE settings (id SERIAL PRIMARY KEY, key VARCHAR(100) UNIQUE NOT NULL, value TEXT NOT NULL)');
+        await pool.query("INSERT INTO settings (key, value) VALUES ('secretary_name', 'Vishnu S O'), ('secretary_phone', '+91 8217495728'), ('cashier_name', 'Raveesh Kalyani'), ('cashier_phone', '+91 8431457138') ON CONFLICT (key) DO NOTHING");
+        return res.json({
+          secretary_name: 'Vishnu S O',
+          secretary_phone: '+91 8217495728',
+          cashier_name: 'Raveesh Kalyani',
+          cashier_phone: '+91 8431457138'
+        });
+      } catch (innerErr) {
+        console.error('Failed to create settings table:', innerErr.message);
+      }
+    }
+    console.error('Error fetching settings:', err.message);
+    // Graceful fallback
+    res.json({
+      secretary_name: 'Vishnu S O',
+      secretary_phone: '+91 8217495728',
+      cashier_name: 'Raveesh Kalyani',
+      cashier_phone: '+91 8431457138'
+    });
+  }
+});
+
+// Update Settings
+app.post('/api/settings', async (req, res) => {
+  const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
+  if (req.headers['x-admin-key'] !== masterKey) {
+    return res.status(401).json({ error: 'Unauthorized access.' });
+  }
+
+  try {
+    const settings = req.body; // expected: { secretary_name: '...', ... }
+    for (const [key, value] of Object.entries(settings)) {
+      await pool.query('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value', [key, value]);
+    }
+    res.json({ success: true, message: 'Settings updated successfully' });
+  } catch (err) {
+    console.error('Error updating settings:', err.message);
+    res.status(500).json({ error: 'Server error while updating settings' });
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);

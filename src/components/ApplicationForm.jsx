@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FaCheckCircle, FaSpinner } from 'react-icons/fa';
+import { FaCheckCircle, FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function ApplicationForm() {
   const [formData, setFormData] = useState({
@@ -41,6 +41,7 @@ export default function ApplicationForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const VITE_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
@@ -316,7 +317,16 @@ export default function ApplicationForm() {
 
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
             <label className="block text-sm font-medium text-gray-700 mb-2">Create Application Password (Required for later access)</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-blue-700 disabled:opacity-70 text-white font-bold py-4 rounded-xl shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex justify-center items-center h-14 text-lg">

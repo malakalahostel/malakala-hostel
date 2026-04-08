@@ -1,9 +1,9 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { FaFilePdf, FaUsers, FaSpinner, FaLock } from 'react-icons/fa';
+import { FaFilePdf, FaUsers, FaSpinner, FaLock, FaEye, FaEyeSlash, FaTrash, FaSave, FaCog } from 'react-icons/fa';
 
 export default function AdminPanel() {
   const [applicants, setApplicants] = useState([]);
@@ -13,6 +13,17 @@ export default function AdminPanel() {
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminKey, setAdminKey] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Settings State
+  const [settings, setSettings] = useState({
+    secretary_name: '',
+    secretary_phone: '',
+    cashier_name: '',
+    cashier_phone: ''
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState('');
 
   const VITE_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
@@ -27,6 +38,17 @@ export default function AdminPanel() {
       });
       setApplicants(res.data);
       setIsAuthenticated(true);
+      
+      // Fetch Settings
+      try {
+        const settingsRes = await axios.get(`${VITE_API_URL}/api/settings`);
+        if (settingsRes.data && settingsRes.data.secretary_name) {
+          setSettings(settingsRes.data);
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+      
     } catch (err) {
       console.error(err);
       if (err.response && err.response.status === 401) {
@@ -36,6 +58,43 @@ export default function AdminPanel() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this application? This cannot be undone.')) {
+      return;
+    }
+    try {
+      await axios.delete(`${VITE_API_URL}/api/applications/${id}`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      setApplicants(applicants.filter(app => app.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete application.');
+    }
+  };
+
+  const handleSettingsChange = (e) => {
+    setSettings({ ...settings, [e.target.name]: e.target.value });
+  };
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    setSettingsMessage('');
+    try {
+      await axios.post(`${VITE_API_URL}/api/settings`, settings, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      setSettingsMessage('Settings saved successfully!');
+      setTimeout(() => setSettingsMessage(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setSettingsMessage('Failed to save settings.');
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -262,15 +321,22 @@ export default function AdminPanel() {
           <p className="text-gray-500 mb-8">Please enter the Administrator Password to view student applications.</p>
           
           <form onSubmit={handleLogin} className="space-y-6">
-            <div>
+            <div className="relative">
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
                 placeholder="Enter Master Password..." 
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-center text-lg tracking-widest"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-center text-lg tracking-widest pr-12"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
             </div>
             {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
             <button 
@@ -370,19 +436,81 @@ export default function AdminPanel() {
                         {new Date(app.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <button 
-                          onClick={() => generateIndividualPDF(app)}
-                          className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors group"
-                          title="Generate Detailed Application PDF"
-                        >
-                          <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
-                        </button>
+                        <div className="flex justify-center space-x-3">
+                          <button 
+                            onClick={() => generateIndividualPDF(app)}
+                            className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors group"
+                            title="Generate Detailed Application PDF"
+                          >
+                            <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(app.id)}
+                            className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg transition-colors group"
+                            title="Delete Application"
+                          >
+                            <FaTrash size={18} className="group-hover:scale-110 transition-transform" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Global Settings Section */}
+        <div className="mt-12 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center space-x-3">
+            <FaCog className="text-primary text-xl" />
+            <h2 className="text-xl font-bold text-gray-800">Hostel Contacts Settings</h2>
+          </div>
+          <div className="p-6">
+            <form onSubmit={saveSettings}>
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <h3 className="font-semibold text-gray-700 mb-4 border-b pb-2">Secretary Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
+                      <input type="text" name="secretary_name" value={settings.secretary_name || ''} onChange={handleSettingsChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                      <input type="text" name="secretary_phone" value={settings.secretary_phone || ''} onChange={handleSettingsChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <h3 className="font-semibold text-gray-700 mb-4 border-b pb-2">Cashier Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
+                      <input type="text" name="cashier_name" value={settings.cashier_name || ''} onChange={handleSettingsChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                      <input type="text" name="cashier_phone" value={settings.cashier_phone || ''} onChange={handleSettingsChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" required />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <button type="submit" disabled={savingSettings} className="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center space-x-2">
+                  {savingSettings ? <FaSpinner className="animate-spin" /> : <FaSave />}
+                  <span>{savingSettings ? 'Saving...' : 'Save Settings'}</span>
+                </button>
+                {settingsMessage && (
+                  <span className={`text-sm font-medium ${settingsMessage.includes('Failed') ? 'text-red-500' : 'text-green-500'}`}>
+                    {settingsMessage}
+                  </span>
+                )}
+              </div>
+            </form>
           </div>
         </div>
       </div>

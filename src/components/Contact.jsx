@@ -1,7 +1,31 @@
-﻿import React from 'react';
-import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaSpinner } from 'react-icons/fa';
+import axios from 'axios';
 
 export default function Contact() {
+  const [settings, setSettings] = useState({
+    secretary_name: 'Vishnu S O',
+    secretary_phone: '+91 8217495728',
+    cashier_name: 'Raveesh Kalyani',
+    cashier_phone: '+91 8431457138'
+  });
+
+  const VITE_API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(`${VITE_API_URL}/api/settings`);
+        if (res.data && res.data.secretary_name) {
+          setSettings(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      }
+    };
+    fetchSettings();
+  }, [VITE_API_URL]);
+
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="container mx-auto px-6">
@@ -23,8 +47,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">Phone</h4>
-                  <p className="text-gray-600">Secretary Vishnu S O: +91 8217495728</p>
-                  <p className="text-gray-600">Cashier Raveesh Kalyani: +91 8431457138</p>
+                  <p className="text-gray-600">Secretary {settings.secretary_name}: {settings.secretary_phone}</p>
+                  <p className="text-gray-600">Cashier {settings.cashier_name}: {settings.cashier_phone}</p>
                 </div>
               </div>
 
