@@ -33,10 +33,9 @@ export const generateApplicationPDF = (app) => {
     ['Email Address', app.email],
     ['Residential Address', app.address],
     
-    [{ content: 'Academic & Payment Information', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
+    [{ content: 'Academic Information', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
     ['Expected College', app.expected_college || 'N/A'],
     ['Intended Course', app.course_intended || 'N/A'],
-    ['Transaction ID (UTR)', app.utr_number || app.payment_id || 'N/A'],
     
     [{ content: 'Additional Responses', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
     ['Receives outside help?', app.receives_help ? `Yes. (${app.help_details || ''})` : 'No'],

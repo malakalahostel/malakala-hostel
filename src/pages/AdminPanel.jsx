@@ -395,7 +395,7 @@ export default function AdminPanel() {
                   <th className="py-4 px-6 font-semibold">Academics</th>
                   <th className="py-4 px-6 font-semibold">Contact Info</th>
                   <th className="py-4 px-6 font-semibold">DOB & Blood</th>
-                  <th className="py-4 px-6 font-semibold">Applied On</th>
+                  <th className="py-4 px-6 font-semibold">Date & Payment (UTR)</th>
                   <th className="py-4 px-6 font-semibold text-center">Actions</th>
                 </tr>
               </thead>
@@ -433,7 +433,12 @@ export default function AdminPanel() {
                         <div className="text-xs text-red-500 font-medium">{app.blood_group || 'N/A'}</div>
                       </td>
                       <td className="py-4 px-6 text-gray-500 text-sm">
-                        {new Date(app.created_at).toLocaleDateString()}
+                        <div className="mb-2 font-medium">{new Date(app.created_at).toLocaleDateString()}</div>
+                        {app.payment_id && (
+                          <div className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded inline-block font-mono border border-indigo-100 shadow-sm" title="Payment UTR Number">
+                            {app.payment_id}
+                          </div>
+                        )}
                       </td>
                       <td className="py-4 px-6 text-center">
                         <div className="flex justify-center space-x-3">
