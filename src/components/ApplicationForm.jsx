@@ -19,7 +19,10 @@ export default function ApplicationForm() {
     ],
     hobbies: '',
     achievements: '',
-    address: '',
+    street: '',
+    city: '',
+    state: '',
+    pincode: '',
     email: '',
     phone_number: '',
     password: '',
@@ -35,7 +38,8 @@ export default function ApplicationForm() {
     other_hostel_details: '',
     contagious_disease: false,
     disease_details: '',
-    agreed_to_terms: false
+    agreed_to_terms: false,
+    utr_number: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -73,7 +77,10 @@ export default function ApplicationForm() {
     setError('');
 
     try {
-      const res = await axios.post(`${VITE_API_URL}/api/applications`, formData);
+      const submitData = { ...formData };
+      submitData.address = `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
+      
+      const res = await axios.post(`${VITE_API_URL}/api/applications`, submitData);
       if (res.data.success) {
         setSubmitted(true);
       }
@@ -159,12 +166,27 @@ export default function ApplicationForm() {
                 <label className="block text-sm font-medium text-gray-200 mb-2">Annual Family Income</label>
                 <input type="text" name="annual_income" value={formData.annual_income} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="e.g. 5,00,000" />
               </div>
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Residential Address</label>
-                <textarea name="address" value={formData.address} onChange={handleChange} required rows="2" className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"></textarea>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Street Address</label>
+                <textarea name="street" value={formData.street} onChange={handleChange} required rows="2" className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"></textarea>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">City / Town</label>
+                  <input type="text" name="city" value={formData.city} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">State</label>
+                  <input type="text" name="state" value={formData.state} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
+                </div>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Pincode</label>
+                <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">Phone Number</label>
                 <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} required pattern="^[0-9]{10}$" title="Must be a valid 10-digit phone number" className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" />
@@ -228,9 +250,40 @@ export default function ApplicationForm() {
             </div>
           </div>
 
-          {/* SECTION 3: Additional Questionnaire */}
+          {/* SECTION 3: Payment Details */}
           <div className="glass p-6 rounded-2xl border border-red-900">
-            <h3 className="text-xl font-semibold mb-6 border-b pb-2 text-primary">3. Additional Details</h3>
+            <h3 className="text-xl font-semibold mb-6 border-b pb-2 text-primary">3. Payment Information</h3>
+            
+            <div className="bg-red-900/30 p-6 rounded-xl mb-6 border border-red-800 flex flex-col sm:flex-row items-center gap-6 shadow-inner">
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-base text-gray-200 mb-3 leading-relaxed">
+                  Please scan the QR code to pay the required application fee to the hostel account via UPI.
+                </p>
+                <div className="inline-block bg-black/50 px-4 py-2 rounded-lg border border-gray-700">
+                  <p className="text-sm text-gray-400 mb-1">Official UPI ID</p>
+                  <p className="text-lg font-bold text-primary tracking-wide">malkalahostel@upi</p>
+                </div>
+              </div>
+              
+              <div className="bg-white p-3 rounded-xl shadow-lg shrink-0 transform hover:scale-105 transition-transform duration-300">
+                <img 
+                  src="/images/qr.jpeg" 
+                  alt="Payment QR Code" 
+                  className="w-36 h-36 object-contain"
+                />
+                <p className="text-xs text-center text-gray-600 mt-2 font-semibold">Scan to Pay</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-2">UTR / Transaction ID</label>
+              <input type="text" name="utr_number" value={formData.utr_number} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="e.g. 123456789012" />
+            </div>
+          </div>
+
+          {/* SECTION 4: Additional Questionnaire */}
+          <div className="glass p-6 rounded-2xl border border-red-900">
+            <h3 className="text-xl font-semibold mb-6 border-b pb-2 text-primary">4. Additional Details</h3>
 
             <div className="space-y-6">
               {/* Q1 */}
@@ -295,7 +348,7 @@ export default function ApplicationForm() {
             </div>
           </div>
 
-          {/* SECTION 4: Terms & Conditions */}
+          {/* SECTION 5: Terms & Conditions */}
           <div className="glass border-red-900 border-2 border-primary/20 p-6 md:p-8 rounded-2xl shadow-inner">
             <h3 className="text-xl font-bold mb-4 text-secondary">Declaration</h3>
             <p className="font-semibold text-white mb-4">To M. S. S. V. Dharmasamsthe, Bengaluru-560019. Sir,</p>

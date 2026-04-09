@@ -13,7 +13,9 @@ dotenv.config();
 const { Pool } = pkg;
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -68,7 +70,7 @@ app.post('/api/applications', async (req, res) => {
        JSON.stringify(academic_history), hobbies, achievements, address, email, phone_number, passwordHash,
        receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
        relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
-       null, 'not_required']
+       utr_number || null, 'pending']
     );
 
     const applicationId = newApplicant.rows[0].id;
@@ -175,7 +177,7 @@ app.post('/api/auth/applicant', async (req, res) => {
       return res.status(400).json({ error: 'Email and Password are required.' });
     }
 
-    const { rows } = await pool.query('SELECT * FROM applicants WHERE email = ', [email]);
+    const { rows } = await pool.query('SELECT * FROM applicants WHERE email = $1', [email]);
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials. Record not found.' });
     }
