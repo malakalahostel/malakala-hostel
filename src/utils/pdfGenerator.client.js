@@ -33,6 +33,10 @@ export const generateIndividualPDF = (app) => {
       ['Email Address', app.email],
       ['Residential Address', app.address],
       
+      [{ content: 'Academic Information', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
+      ['Expected College', app.expected_college || 'N/A'],
+      ['Intended Course', app.course_intended || 'N/A'],
+      
       [{ content: 'Additional Responses', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
       ['Receives outside help?', app.receives_help ? `Yes. (${app.help_details || ''})` : 'No'],
       ['Has fee concession/scholarship?', app.has_scholarship ? `Yes. (${app.scholarship_details || ''})` : 'No'],
@@ -51,10 +55,10 @@ export const generateIndividualPDF = (app) => {
       startY: 42,
       theme: 'grid',
       body: formatData,
-      styles: { fontSize: 10, cellPadding: 4 },
+      styles: { fontSize: 9, cellPadding: 3 },
       columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 65, fillColor: [250, 250, 250] },
-        1: { cellWidth: 115 }
+        0: { fontStyle: 'bold', cellWidth: 75, fillColor: [250, 250, 250] },
+        1: { cellWidth: 105 }
       }
     });
 

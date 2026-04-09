@@ -14,6 +14,7 @@ export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminKey, setAdminKey] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState(''); // 'admin' or 'donor'
 
   // Settings State
   const [settings, setSettings] = useState({
@@ -36,7 +37,8 @@ export default function AdminPanel() {
       const res = await axios.get(`${VITE_API_URL}/api/applications`, {
         headers: { 'x-admin-key': adminKey }
       });
-      setApplicants(res.data);
+      setApplicants(res.data.data || []);
+      setRole(res.data.role);
       setIsAuthenticated(true);
       
       // Fetch Settings
@@ -73,6 +75,19 @@ export default function AdminPanel() {
     } catch (err) {
       console.error(err);
       alert('Failed to delete application.');
+    }
+  };
+
+  const handleUpdateStatus = async (id, status) => {
+    if(!window.confirm(`Are you sure you want to change this applicant's status to '${status}'?`)) return;
+    try {
+      await axios.put(`${VITE_API_URL}/api/applications/${id}/status`, { status }, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      setApplicants(applicants.map(app => app.id === id ? { ...app, selection_status: status } : app));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update status.');
     }
   };
 
@@ -365,7 +380,7 @@ export default function AdminPanel() {
               <FaUsers size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{role === 'donor' ? 'Donor Dashboard' : 'Admin Dashboard'}</h1>
               <p className="text-gray-500">Manage hostel applications</p>
             </div>
           </div>
@@ -442,20 +457,51 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-4 px-6 text-center">
                         <div className="flex justify-center space-x-3">
-                          <button 
-                            onClick={() => generateIndividualPDF(app)}
-                            className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors group"
-                            title="Generate Detailed Application PDF"
-                          >
-                            <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(app.id)}
-                            className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg transition-colors group"
-                            title="Delete Application"
-                          >
-                            <FaTrash size={18} className="group-hover:scale-110 transition-transform" />
-                          </button>
+                          {role === 'admin' && (!app.selection_status || app.selection_status === 'pending') && (
+                            <button 
+                              onClick={() => handleUpdateStatus(app.id, 'sent_to_donor')}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
+                            >
+                              Send to Donor
+                            </button>
+                          )}
+                          {role === 'admin' && app.selection_status === 'sent_to_donor' && (
+                            <span className="text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Awaiting Donor</span>
+                          )}
+                          {role === 'admin' && app.selection_status === 'selected_by_donor' && (
+                            <span className="text-green-600 bg-green-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Approved</span>
+                          )}
+
+                          {role === 'donor' && app.selection_status === 'sent_to_donor' && (
+                            <button 
+                              onClick={() => handleUpdateStatus(app.id, 'selected_by_donor')}
+                              className="bg-green-50 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
+                            >
+                              Approve
+                            </button>
+                          )}
+                          {role === 'donor' && app.selection_status === 'selected_by_donor' && (
+                            <span className="text-green-600 bg-green-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Approved</span>
+                          )}
+                          
+                          {role === 'admin' && (
+                            <>
+                              <button 
+                                onClick={() => generateIndividualPDF(app)}
+                                className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors group"
+                                title="Generate Detailed Application PDF"
+                              >
+                                <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(app.id)}
+                                className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg transition-colors group"
+                                title="Delete Application"
+                              >
+                                <FaTrash size={18} className="group-hover:scale-110 transition-transform" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -466,7 +512,8 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* Global Settings Section */}
+        {/* Global Settings Section (Admin Only) */}
+        {role === 'admin' && (
         <div className="mt-12 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center space-x-3">
             <FaCog className="text-primary text-xl" />
@@ -518,6 +565,7 @@ export default function AdminPanel() {
             </form>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

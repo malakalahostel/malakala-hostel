@@ -200,17 +200,28 @@ app.post('/api/auth/applicant', async (req, res) => {
 });
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
+  const adminKey = req.headers['x-admin-key'];
   const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
-  if (req.headers['x-admin-key'] !== masterKey) {
-    return res.status(401).json({ error: 'Unauthorized access. Incorrect Master Password.' });
-  }
-
-  try {
-    const allApplicants = await pool.query('SELECT id, applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, academic_history, hobbies, achievements, address, email, phone_number, receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details, relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details, payment_status, payment_id, created_at FROM applicants ORDER BY created_at DESC');
-    res.json(allApplicants.rows);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Server error while fetching applications' });
+  const donorKey = process.env.DONOR_PASSWORD || 'donor123';
+  
+  if (adminKey === masterKey) {
+    try {
+      const allApplicants = await pool.query('SELECT *, payment_status, payment_id, created_at FROM applicants ORDER BY created_at DESC');
+      return res.json({ role: 'admin', data: allApplicants.rows });
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).json({ error: 'Server error' });
+    }
+  } else if (adminKey === donorKey) {
+    try {
+      const allApplicants = await pool.query("SELECT * FROM applicants WHERE selection_status IN ('sent_to_donor', 'selected_by_donor') ORDER BY created_at DESC");
+      return res.json({ role: 'donor', data: allApplicants.rows });
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).json({ error: 'Server error' });
+    }
+  } else {
+    return res.status(401).json({ error: 'Unauthorized access. Incorrect Password.' });
   }
 });
 
@@ -228,6 +239,58 @@ app.delete('/api/applications/:id', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'Server error while deleting application' });
+  }
+});
+
+// Status Update Route
+app.put('/api/applications/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const key = req.headers['x-admin-key'];
+  
+  try {
+    if (key === (process.env.ADMIN_PASSWORD || 'malkala123') && status === 'sent_to_donor') {
+      await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2", [status, id]);
+      res.json({ success: true, status });
+    } 
+    else if (key === (process.env.DONOR_PASSWORD || 'donor123') && status === 'selected_by_donor') {
+      const result = await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2 RETURNING *", [status, id]);
+      const appData = result.rows[0];
+      
+      // dispatch email
+      try {
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+          const mailOptions = {
+            from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
+            to: appData.email,
+            subject: 'Application Selected! - Malkala Hostel',
+            html: `
+              <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; padding: 40px 30px;">
+                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Congratulations, ${appData.applicant_name}! 🌟</h2>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    We are thrilled to inform you that your application has been successfully selected by our donors for admission to Malkala Hostel!
+                  </p>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    The administration will reach out to you very soon with your official check-in instructions and requirements. We look forward to welcoming you to the hostel.
+                  </p>
+                </div>
+              </div>`
+          };
+          await transporter.sendMail(mailOptions);
+        }
+      } catch (e) {
+        console.error('Failed to send selection email:', e);
+      }
+      
+      res.json({ success: true, status });
+    }
+    else {
+      res.status(401).json({ error: 'Unauthorized to perform this action.' });
+    }
+  } catch(e) {
+    console.error(e.message);
+    res.status(500).json({ error: 'Server error updating status' });
   }
 });
 
@@ -303,6 +366,10 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
   });
 }
+
+pool.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS selection_status VARCHAR(50) DEFAULT 'pending'")
+  .then(() => console.log("Schema check passed: selection_status column available"))
+  .catch((err) => console.log("DB Schema Check Exception:", err.message));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
