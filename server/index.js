@@ -214,7 +214,7 @@ app.get('/api/applications', async (req, res) => {
     }
   } else if (adminKey === donorKey) {
     try {
-      const allApplicants = await pool.query("SELECT * FROM applicants WHERE selection_status IN ('sent_to_donor', 'selected_by_donor') ORDER BY created_at DESC");
+      const allApplicants = await pool.query("SELECT * FROM applicants WHERE selection_status IN ('sent_to_donor', 'selected_by_donor', 'rejected_by_donor') ORDER BY created_at DESC");
       return res.json({ role: 'donor', data: allApplicants.rows });
     } catch (err) {
       console.error(err.message);
@@ -253,18 +253,17 @@ app.put('/api/applications/:id/status', async (req, res) => {
       await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2", [status, id]);
       res.json({ success: true, status });
     } 
-    else if (key === (process.env.DONOR_PASSWORD || 'donor123') && status === 'selected_by_donor') {
+    else if (key === (process.env.DONOR_PASSWORD || 'donor123') && (status === 'selected_by_donor' || status === 'rejected_by_donor')) {
       const result = await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2 RETURNING *", [status, id]);
       const appData = result.rows[0];
       
       // dispatch email
       try {
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-          const mailOptions = {
-            from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
-            to: appData.email,
-            subject: 'Application Selected! - Malkala Hostel',
-            html: `
+          const isSelected = status === 'selected_by_donor';
+          const subjectText = isSelected ? 'Application Selected! - Malkala Hostel' : 'Update regarding your Application - Malkala Hostel';
+          const htmlContent = isSelected 
+          ? `
               <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; padding: 40px 30px;">
                   <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Congratulations, ${appData.applicant_name}! 🌟</h2>
@@ -276,11 +275,32 @@ app.put('/api/applications/:id/status', async (req, res) => {
                   </p>
                 </div>
               </div>`
+          : `
+              <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; padding: 40px 30px;">
+                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Application Update</h2>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    Dear ${appData.applicant_name},
+                  </p>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    We sincerely thank you for applying to Malkala Hostel. After careful consideration, we regret to inform you that we cannot offer you a seat at this time due to limited availability.
+                  </p>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    We wish you the very best in your academic journey.
+                  </p>
+                </div>
+              </div>`;
+
+          const mailOptions = {
+            from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
+            to: appData.email,
+            subject: subjectText,
+            html: htmlContent
           };
           await transporter.sendMail(mailOptions);
         }
       } catch (e) {
-        console.error('Failed to send selection email:', e);
+        console.error('Failed to send status update email:', e);
       }
       
       res.json({ success: true, status });

@@ -471,17 +471,31 @@ export default function AdminPanel() {
                           {role === 'admin' && app.selection_status === 'selected_by_donor' && (
                             <span className="text-green-600 bg-green-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Approved</span>
                           )}
+                          {role === 'admin' && app.selection_status === 'rejected_by_donor' && (
+                            <span className="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Rejected</span>
+                          )}
 
                           {role === 'donor' && app.selection_status === 'sent_to_donor' && (
-                            <button 
-                              onClick={() => handleUpdateStatus(app.id, 'selected_by_donor')}
-                              className="bg-green-50 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
-                            >
-                              Approve
-                            </button>
+                            <>
+                              <button 
+                                onClick={() => handleUpdateStatus(app.id, 'selected_by_donor')}
+                                className="bg-green-50 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                onClick={() => handleUpdateStatus(app.id, 'rejected_by_donor')}
+                                className="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </>
                           )}
                           {role === 'donor' && app.selection_status === 'selected_by_donor' && (
                             <span className="text-green-600 bg-green-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Approved</span>
+                          )}
+                          {role === 'donor' && app.selection_status === 'rejected_by_donor' && (
+                            <span className="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg font-medium text-sm my-auto">Rejected</span>
                           )}
                           
                           {role === 'admin' && (
