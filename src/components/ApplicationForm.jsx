@@ -166,6 +166,7 @@ export default function ApplicationForm() {
                 <label className="block text-sm font-medium text-gray-200 mb-2">Annual Family Income</label>
                 <input type="text" name="annual_income" value={formData.annual_income} onChange={handleChange} required className="w-full px-4 py-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="e.g. 5,00,000" />
               </div>
+            </div>
             <div className="grid md:grid-cols-2 gap-6 mt-6">
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">Street Address</label>
