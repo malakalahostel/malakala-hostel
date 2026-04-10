@@ -258,11 +258,15 @@ export default function ApplicationForm() {
             <div className="bg-red-900/30 p-6 rounded-xl mb-6 border border-red-800 flex flex-col sm:flex-row items-center gap-6 shadow-inner">
               <div className="flex-1 text-center sm:text-left">
                 <p className="text-base text-gray-200 mb-3 leading-relaxed">
-                  Please scan the QR code to pay the required application fee to the hostel account via UPI.
+                  Please scan the QR code to pay the required application fee of <strong className="text-white text-lg">50RS INR</strong> to the hostel account via UPI.
                 </p>
                 <div className="inline-block bg-black/50 px-4 py-2 rounded-lg border border-gray-700">
                   <p className="text-sm text-gray-400 mb-1">Official UPI ID</p>
                   <p className="text-lg font-bold text-primary tracking-wide">malkalahostel@upi</p>
+                  <div className="mt-2 pt-2 border-t border-gray-700">
+                    <p className="text-sm text-gray-400 mb-1">Amount Payable</p>
+                    <p className="text-xl font-bold text-green-400 tracking-wide">50 RS</p>
+                  </div>
                 </div>
               </div>
               
