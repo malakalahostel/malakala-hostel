@@ -21,7 +21,8 @@ export default function AdminPanel() {
     secretary_name: '',
     secretary_phone: '',
     cashier_name: '',
-    cashier_phone: ''
+    cashier_phone: '',
+    whatsapp_group_link: ''
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState('');
@@ -562,6 +563,22 @@ export default function AdminPanel() {
                       <input type="text" name="cashier_phone" value={settings.cashier_phone || ''} onChange={handleSettingsChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" required />
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-6">
+                <h3 className="font-semibold text-gray-700 mb-4 border-b pb-2">WhatsApp Group</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Group Invite Link</label>
+                  <input 
+                    type="url" 
+                    name="whatsapp_group_link" 
+                    value={settings.whatsapp_group_link || ''} 
+                    onChange={handleSettingsChange} 
+                    placeholder="https://chat.whatsapp.com/..." 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-transparent" 
+                  />
+                  <p className="text-xs text-gray-500 mt-1">This link will be sent to applicants in their confirmation emails. Update this when the group invite expires.</p>
                 </div>
               </div>
 
