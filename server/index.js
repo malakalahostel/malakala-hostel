@@ -132,6 +132,15 @@ app.post('/api/applications', async (req, res) => {
                     We will notify you directly regarding the next steps, including seat allotment procedures. If you have any questions, feel free to contact the administration.
                   </p>
 
+                  <!-- WhatsApp Group Link -->
+                  <div style="background-color: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
+                    <p style="color: #166534; font-size: 15px; margin: 0 0 12px 0; font-weight: 500;">💬 Join Our WhatsApp Group</p>
+                    <a href="https://chat.whatsapp.com/E8UIqxH9zZhEjErc6ING5x?mode=gi_t" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background-color 0.3s;">
+                      Join WhatsApp Group
+                    </a>
+                    <p style="color: #166534; font-size: 13px; margin: 12px 0 0 0;">Stay updated with important announcements and hostel news</p>
+                  </div>
+
                 </div>
 
                 <!-- Footer -->
