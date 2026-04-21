@@ -76,6 +76,17 @@ app.post('/api/applications', async (req, res) => {
 
     const applicationId = newApplicant.rows[0].id;
 
+    // Fetch settings for WhatsApp link
+    let whatsappLink = 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t'; // Default fallback
+    try {
+      const settingsResult = await pool.query('SELECT value FROM settings WHERE key = $1', ['whatsapp_group_link']);
+      if (settingsResult.rows.length > 0) {
+        whatsappLink = settingsResult.rows[0].value;
+      }
+    } catch (settingsErr) {
+      console.error('Failed to fetch WhatsApp link from settings:', settingsErr.message);
+    }
+
     // Send Confirmation Email
     try {
       if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -135,7 +146,7 @@ app.post('/api/applications', async (req, res) => {
                   <!-- WhatsApp Group Link -->
                   <div style="background-color: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
                     <p style="color: #166534; font-size: 15px; margin: 0 0 12px 0; font-weight: 500;">💬 Join Our WhatsApp Group</p>
-                    <a href="https://chat.whatsapp.com/E8UIqxH9zZhEjErc6ING5x?mode=gi_t" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background-color 0.3s;">
+                    <a href="${whatsappLink}" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background-color 0.3s;">
                       Join WhatsApp Group
                     </a>
                     <p style="color: #166534; font-size: 13px; margin: 12px 0 0 0;">Stay updated with important announcements and hostel news</p>
@@ -337,7 +348,8 @@ app.get('/api/settings', async (req, res) => {
         secretary_name: 'Vishnu S O',
         secretary_phone: '+91 8217495728',
         cashier_name: 'Raveesh Kalyani',
-        cashier_phone: '+91 8431457138'
+        cashier_phone: '+91 8431457138',
+        whatsapp_group_link: 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t'
       });
     }
     res.json(settings);
@@ -345,12 +357,13 @@ app.get('/api/settings', async (req, res) => {
     if (err.code === '42P01') { // table doesn't exist
       try {
         await pool.query('CREATE TABLE settings (id SERIAL PRIMARY KEY, key VARCHAR(100) UNIQUE NOT NULL, value TEXT NOT NULL)');
-        await pool.query("INSERT INTO settings (key, value) VALUES ('secretary_name', 'Vishnu S O'), ('secretary_phone', '+91 8217495728'), ('cashier_name', 'Raveesh Kalyani'), ('cashier_phone', '+91 8431457138') ON CONFLICT (key) DO NOTHING");
+        await pool.query("INSERT INTO settings (key, value) VALUES ('secretary_name', 'Vishnu S O'), ('secretary_phone', '+91 8217495728'), ('cashier_name', 'Raveesh Kalyani'), ('cashier_phone', '+91 8431457138'), ('whatsapp_group_link', 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t') ON CONFLICT (key) DO NOTHING");
         return res.json({
           secretary_name: 'Vishnu S O',
           secretary_phone: '+91 8217495728',
           cashier_name: 'Raveesh Kalyani',
-          cashier_phone: '+91 8431457138'
+          cashier_phone: '+91 8431457138',
+          whatsapp_group_link: 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t'
         });
       } catch (innerErr) {
         console.error('Failed to create settings table:', innerErr.message);
@@ -362,7 +375,8 @@ app.get('/api/settings', async (req, res) => {
       secretary_name: 'Vishnu S O',
       secretary_phone: '+91 8217495728',
       cashier_name: 'Raveesh Kalyani',
-      cashier_phone: '+91 8431457138'
+      cashier_phone: '+91 8431457138',
+      whatsapp_group_link: 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t'
     });
   }
 });
