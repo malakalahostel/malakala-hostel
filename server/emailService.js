@@ -160,6 +160,36 @@ export async function verifyEmailConnection() {
 }
 
 /**
+ * Upload one attachment buffer to Elastic Email and return its AttachmentID.
+ * Returns null on failure (email will still send without that attachment).
+ */
+async function uploadAttachmentToElasticEmail(apiKey, filename, contentBuffer) {
+  try {
+    const res = await fetch(
+      `https://api.elasticemail.com/v4/attachments?fileName=${encodeURIComponent(filename)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'X-ElasticEmail-ApiKey': apiKey,
+          'Content-Type': 'application/octet-stream'
+        },
+        body: contentBuffer
+      }
+    );
+    const data = await res.json();
+    if (res.ok && data.AttachmentID) {
+      console.log(`Attachment uploaded to Elastic Email: ${filename} → ID ${data.AttachmentID}`);
+      return data.AttachmentID;
+    }
+    console.error(`Elastic Email attachment upload failed for ${filename}:`, JSON.stringify(data));
+    return null;
+  } catch (err) {
+    console.error(`Elastic Email attachment upload error for ${filename}:`, err.message);
+    return null;
+  }
+}
+
+/**
  * Send an email. Never throws — returns { success, error? }.
  * Application flow should keep succeeding even if mail fails.
  */
@@ -167,14 +197,9 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
   // Try Elastic Email HTTP API if ELASTIC_EMAIL_API_KEY is configured
   if (process.env.ELASTIC_EMAIL_API_KEY) {
     try {
-      const formattedAttachments = attachments.map(att => ({
-        Name: att.filename,
-        ContentType: att.contentType || 'application/pdf',
-        Content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : Buffer.from(att.content || '').toString('base64')
-      }));
+      const apiKey = process.env.ELASTIC_EMAIL_API_KEY;
 
-      // EMAIL_FROM must be set in Render env vars e.g: Malkala Hostel <noreply@malkalahostel.com>
-      // EMAIL_USER is also acceptable if it is your verified Elastic Email sender address.
+      // EMAIL_FROM must be set in Render env vars — must be a verified sender in Elastic Email.
       const fromAddress = (process.env.EMAIL_FROM || process.env.EMAIL_USER || '').trim();
       if (!fromAddress) {
         const msg = 'Elastic Email: EMAIL_FROM (or EMAIL_USER) env var is not set — cannot send.';
@@ -182,6 +207,16 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
         return { success: false, error: msg };
       }
 
+      // Step 1: Upload each attachment and collect IDs
+      const attachmentIds = [];
+      for (const att of attachments) {
+        const buf = Buffer.isBuffer(att.content) ? att.content : Buffer.from(att.content || '');
+        if (buf.length === 0) continue;
+        const id = await uploadAttachmentToElasticEmail(apiKey, att.filename, buf);
+        if (id) attachmentIds.push(id);
+      }
+
+      // Step 2: Send transactional email, referencing uploaded attachment IDs
       const payload = {
         Recipients: {
           To: [to]
@@ -199,23 +234,20 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
         }
       };
 
-      if (formattedAttachments.length > 0) {
-        payload.Content.Attachments = formattedAttachments;
+      if (attachmentIds.length > 0) {
+        // Elastic Email v4 /emails/transactional references pre-uploaded attachment IDs
+        payload.Content.AttachmentIDs = attachmentIds;
       }
 
-      // Debug log — remove once confirmed working
-      console.log('Elastic Email payload (without attachment content):', JSON.stringify({
+      console.log('Elastic Email send payload:', JSON.stringify({
         ...payload,
-        Content: {
-          ...payload.Content,
-          Attachments: payload.Content.Attachments?.map(a => ({ Name: a.Name, ContentType: a.ContentType, ContentLength: a.Content?.length }))
-        }
+        Content: { ...payload.Content }
       }));
 
       const res = await fetch('https://api.elasticemail.com/v4/emails/transactional', {
         method: 'POST',
         headers: {
-          'X-ElasticEmail-ApiKey': process.env.ELASTIC_EMAIL_API_KEY,
+          'X-ElasticEmail-ApiKey': apiKey,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
