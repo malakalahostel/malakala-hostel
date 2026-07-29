@@ -170,10 +170,17 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
       const formattedAttachments = attachments.map(att => ({
         Name: att.filename,
         ContentType: att.contentType || 'application/pdf',
-        Content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content
+        Content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : Buffer.from(att.content || '').toString('base64')
       }));
 
-      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      // EMAIL_FROM must be set in Render env vars e.g: Malkala Hostel <noreply@malkalahostel.com>
+      // EMAIL_USER is also acceptable if it is your verified Elastic Email sender address.
+      const fromAddress = (process.env.EMAIL_FROM || process.env.EMAIL_USER || '').trim();
+      if (!fromAddress) {
+        const msg = 'Elastic Email: EMAIL_FROM (or EMAIL_USER) env var is not set — cannot send.';
+        console.error(msg);
+        return { success: false, error: msg };
+      }
 
       const payload = {
         Recipients: {
@@ -186,7 +193,7 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
             {
               ContentType: 'HTML',
               Charset: 'utf-8',
-              Content: html
+              Content: html || '<p>Your application has been received.</p>'
             }
           ]
         }
@@ -195,6 +202,15 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
       if (formattedAttachments.length > 0) {
         payload.Content.Attachments = formattedAttachments;
       }
+
+      // Debug log — remove once confirmed working
+      console.log('Elastic Email payload (without attachment content):', JSON.stringify({
+        ...payload,
+        Content: {
+          ...payload.Content,
+          Attachments: payload.Content.Attachments?.map(a => ({ Name: a.Name, ContentType: a.ContentType, ContentLength: a.Content?.length }))
+        }
+      }));
 
       const res = await fetch('https://api.elasticemail.com/v4/emails/transactional', {
         method: 'POST',
@@ -210,13 +226,15 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
         console.log(`Email sent via Elastic Email API to ${to} — transactionId=${data.TransactionID || data.MessageID}`);
         return { success: true, messageId: data.TransactionID || data.MessageID };
       } else {
-        throw new Error(data.message || JSON.stringify(data));
+        console.error('Elastic Email API error response:', JSON.stringify(data));
+        throw new Error(data.Error || data.message || JSON.stringify(data));
       }
     } catch (err) {
       console.error('Elastic Email API failed to send:', err.message);
       return { success: false, error: err.message };
     }
   }
+
 
   // Try Resend HTTP API if RESEND_API_KEY is configured
   if (process.env.RESEND_API_KEY) {
