@@ -7,6 +7,11 @@ import nodemailer from 'nodemailer';
 import path from 'path';
 import { generateApplicationPDF } from './pdfGenerator.js';
 import { fileURLToPath } from 'url';
+import dns from 'dns';
+
+// Force Node to prefer IPv4 over IPv6 when resolving DNS. 
+// This prevents ENETUNREACH errors on networks that do not support IPv6.
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 
