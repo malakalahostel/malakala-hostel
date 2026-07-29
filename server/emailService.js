@@ -20,6 +20,8 @@ function looksLikePlaceholder(value = '') {
 }
 
 export function isEmailConfigured() {
+  if (process.env.RESEND_API_KEY) return true;
+
   const user = (process.env.EMAIL_USER || '').trim();
   const pass = (process.env.EMAIL_PASS || '').trim();
 
@@ -84,6 +86,10 @@ export function resetTransporter() {
  * Returns { ok, reason, detail? }
  */
 export async function verifyEmailConnection() {
+  if (process.env.RESEND_API_KEY) {
+    return { ok: true, reason: 'Resend HTTP API configured' };
+  }
+
   if (!isEmailConfigured()) {
     const user = process.env.EMAIL_USER || '';
     const pass = process.env.EMAIL_PASS || '';
@@ -104,9 +110,41 @@ export async function verifyEmailConnection() {
     await transport.verify();
     return {
       ok: true,
-      reason: `SMTP ready via ${process.env.SMTP_HOST || 'smtp.gmail.com'}:${process.env.SMTP_PORT || 587} as ${process.env.EMAIL_USER}`
+      reason: `SMTP ready via ${transport.options.host}:${transport.options.port} as ${process.env.EMAIL_USER}`
     };
   } catch (err) {
+    // If the default port 587 failed, and SMTP_PORT was not explicitly configured in env,
+    // let's try port 465 (SSL) as a fallback.
+    if (!process.env.SMTP_PORT && transport.options.port === 587) {
+      console.log('SMTP port 587 verification failed. Trying fallback to port 465 (SSL)...');
+      resetTransporter();
+
+      const fallbackOptions = buildTransportOptions();
+      fallbackOptions.port = 465;
+      fallbackOptions.secure = true;
+      fallbackOptions.requireTLS = false;
+
+      const fallbackTransport = nodemailer.createTransport(fallbackOptions);
+      try {
+        await fallbackTransport.verify();
+        // Cache the successful transporter so sendEmail uses it
+        transporter = fallbackTransport;
+        return {
+          ok: true,
+          reason: `SMTP ready via ${fallbackOptions.host}:${fallbackOptions.port} (SSL fallback) as ${process.env.EMAIL_USER}`
+        };
+      } catch (fallbackErr) {
+        // If both failed, reset back to default
+        resetTransporter();
+        return {
+          ok: false,
+          reason: 'SMTP verification failed (both 587 and 465)',
+          detail: `Port 587 error: ${err.message}. Port 465 error: ${fallbackErr.message}`,
+          code: fallbackErr.code
+        };
+      }
+    }
+
     return {
       ok: false,
       reason: 'SMTP verification failed',
@@ -121,8 +159,46 @@ export async function verifyEmailConnection() {
  * Application flow should keep succeeding even if mail fails.
  */
 export async function sendEmail({ to, subject, html, attachments = [] }) {
+  // Try Resend HTTP API if RESEND_API_KEY is configured
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const formattedAttachments = attachments.map(att => ({
+        filename: att.filename,
+        content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content
+      }));
+
+      const fromAddress = process.env.EMAIL_FROM || 'Malkala Hostel <onboarding@resend.dev>';
+
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: fromAddress,
+          to: [to],
+          subject,
+          html,
+          attachments: formattedAttachments
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log(`Email sent via Resend API to ${to} — id=${data.id}`);
+        return { success: true, messageId: data.id };
+      } else {
+        throw new Error(data.message || JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error('Resend API failed to send:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
   if (!isEmailConfigured()) {
-    const msg = 'Email skipped: SMTP is not configured (missing or placeholder EMAIL_USER/EMAIL_PASS).';
+    const msg = 'Email skipped: Neither Resend API Key nor SMTP user/password is configured.';
     console.error(msg);
     return { success: false, error: msg };
   }
