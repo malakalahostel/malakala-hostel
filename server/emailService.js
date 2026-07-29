@@ -20,6 +20,7 @@ function looksLikePlaceholder(value = '') {
 }
 
 export function isEmailConfigured() {
+  if (process.env.ELASTIC_EMAIL_API_KEY) return true;
   if (process.env.RESEND_API_KEY) return true;
 
   const user = (process.env.EMAIL_USER || '').trim();
@@ -86,6 +87,10 @@ export function resetTransporter() {
  * Returns { ok, reason, detail? }
  */
 export async function verifyEmailConnection() {
+  if (process.env.ELASTIC_EMAIL_API_KEY) {
+    return { ok: true, reason: 'Elastic Email HTTP API configured' };
+  }
+
   if (process.env.RESEND_API_KEY) {
     return { ok: true, reason: 'Resend HTTP API configured' };
   }
@@ -159,6 +164,60 @@ export async function verifyEmailConnection() {
  * Application flow should keep succeeding even if mail fails.
  */
 export async function sendEmail({ to, subject, html, attachments = [] }) {
+  // Try Elastic Email HTTP API if ELASTIC_EMAIL_API_KEY is configured
+  if (process.env.ELASTIC_EMAIL_API_KEY) {
+    try {
+      const formattedAttachments = attachments.map(att => ({
+        Name: att.filename,
+        ContentType: att.contentType || 'application/pdf',
+        Content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content
+      }));
+
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+
+      const payload = {
+        Recipients: {
+          To: [to]
+        },
+        Content: {
+          From: fromAddress,
+          Subject,
+          Body: [
+            {
+              ContentType: 'HTML',
+              Charset: 'utf-8',
+              Content: html
+            }
+          ]
+        }
+      };
+
+      if (formattedAttachments.length > 0) {
+        payload.Content.Attachments = formattedAttachments;
+      }
+
+      const res = await fetch('https://api.elasticemail.com/v4/emails/transactional', {
+        method: 'POST',
+        headers: {
+          'X-ElasticEmail-ApiKey': process.env.ELASTIC_EMAIL_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log(`Email sent via Elastic Email API to ${to} — transactionId=${data.TransactionID || data.MessageID}`);
+        return { success: true, messageId: data.TransactionID || data.MessageID };
+      } else {
+        throw new Error(data.message || JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error('Elastic Email API failed to send:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
   // Try Resend HTTP API if RESEND_API_KEY is configured
   if (process.env.RESEND_API_KEY) {
     try {
