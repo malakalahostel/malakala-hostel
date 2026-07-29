@@ -181,7 +181,7 @@ export async function sendEmail({ to, subject, html, attachments = [] }) {
         },
         Content: {
           From: fromAddress,
-          Subject,
+          Subject: subject,
           Body: [
             {
               ContentType: 'HTML',
