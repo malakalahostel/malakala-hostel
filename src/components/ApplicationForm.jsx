@@ -98,7 +98,11 @@ export default function ApplicationForm() {
         <div className="glass border-red-900 rounded-3xl p-12 shadow-2xl flex flex-col items-center">
           <FaCheckCircle className="text-6xl text-green-500 mb-6" />
           <h2 className="text-3xl font-bold text-secondary mb-4">Application Submitted Successfully</h2>
-          <p className="text-gray-300 mb-8">Thank you, {formData.applicant_name}. We have received your hostel application.</p>
+          <p className="text-gray-300 mb-4">Thank you, {formData.applicant_name}. We have received your hostel application.</p>
+          <p className="text-gray-400 text-sm mb-8">
+            A confirmation email with your application PDF has been sent to <strong className="text-gray-200">{formData.email}</strong>.
+            Please also check your Spam / Junk folder if you do not see it within a few minutes.
+          </p>
         </div>
       </div>
     );

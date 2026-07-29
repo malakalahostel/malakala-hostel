@@ -24,7 +24,7 @@ export const generateApplicationPDF = (app) => {
     [{ content: 'Personal Information', colSpan: 2, styles: { fillColor: [240, 240, 240], fontStyle: 'bold', textColor: [108, 99, 255] } }],
     ['Full Name', app.applicant_name],
     ['Parent / Guardian', app.guardian_name],
-    ['Date of Birth', new Date(app.dob).toLocaleDateString()],
+    ['Date of Birth', app.dob ? new Date(app.dob).toLocaleDateString() : 'N/A'],
     ['Blood Group & Gothram', `${app.blood_group || 'N/A'} | ${app.gothram || 'N/A'}`],
     ['Annual Income', app.annual_income || 'N/A'],
     

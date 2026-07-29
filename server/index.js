@@ -3,58 +3,179 @@ import cors from 'cors';
 import pkg from 'pg';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
 import path from 'path';
 import { generateApplicationPDF } from './pdfGenerator.js';
 import { fileURLToPath } from 'url';
-import dns from 'dns';
+import {
+  isEmailConfigured,
+  sendEmail,
+  verifyEmailConnection
+} from './emailService.js';
 
-// Force Node to prefer IPv4 over IPv6 when resolving DNS. 
-// This prevents ENETUNREACH errors on networks that do not support IPv6.
-dns.setDefaultResultOrder('ipv4first');
-
-dotenv.config();
+// Always load .env from the server directory (not process cwd).
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const { Pool } = pkg;
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
-// Database Connection
+// Database Connection — Supabase requires SSL in all environments
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.DATABASE_URL?.includes('localhost')
+    ? false
+    : { rejectUnauthorized: false }
+});
+
+function buildApplicationConfirmationHtml({
+  applicant_name,
+  guardian_name,
+  expected_college,
+  course_intended,
+  phone_number,
+  whatsappLink
+}) {
+  return `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; margin: 0; text-align: center;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px;">MALAKALA HOSTEL</h1>
+          <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 14px;">M. S. S. V. Dharmasamsthe</p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Application Received!</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+            Dear <strong style="color: #1e293b;">${applicant_name}</strong>,<br><br>
+            Thank you for choosing Malakala Hostel. Your official application has been successfully recorded within our system. Our trustees will review your details shortly.
+          </p>
+
+          <!-- Details Card -->
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+            <h3 style="color: #0f172a; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Application Summary</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+              <tr>
+                <td style="padding: 8px 0; color: #64748b; font-weight: 500; width: 40%;">Applicant:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${applicant_name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Guardian Name:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${guardian_name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Expected College:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${expected_college}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Intended Course:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${course_intended}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Phone Number:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${phone_number}</td>
+              </tr>
+            </table>
+          </div>
+
+          <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+            We will notify you directly regarding the next steps, including seat allotment procedures. If you have any questions, feel free to contact the administration.
+          </p>
+
+          <!-- WhatsApp Group Link -->
+          <div style="background-color: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
+            <p style="color: #166534; font-size: 15px; margin: 0 0 12px 0; font-weight: 500;">Join Our WhatsApp Group</p>
+            <a href="${whatsappLink}" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
+              Join WhatsApp Group
+            </a>
+            <p style="color: #166534; font-size: 13px; margin: 12px 0 0 0;">Stay updated with important announcements and hostel news</p>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0; color: #64748b; font-size: 13px;">
+            <strong>Malakala Hostel Administration</strong><br>
+            Bengaluru-560019<br>
+            malkalahostel1956@gmail.com
+          </p>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+async function buildPdfAttachment(applicationPayload, applicantName) {
+  try {
+    const pdfBuffer = generateApplicationPDF(applicationPayload);
+    const safeName = String(applicantName || 'Applicant').replace(/[^\w.\-]+/g, '_');
+    return [
+      {
+        filename: `Application_${safeName}.pdf`,
+        content: pdfBuffer,
+        contentType: 'application/pdf'
+      }
+    ];
+  } catch (pdfErr) {
+    // PDF failure must not block the confirmation email body.
+    console.error('PDF attachment generation failed (email will send without PDF):', pdfErr.message);
+    return [];
+  }
+}
+
+// Health check (useful on Render)
+app.get('/api/health', async (_req, res) => {
+  let dbOk = false;
+  try {
+    await pool.query('SELECT 1');
+    dbOk = true;
+  } catch {
+    dbOk = false;
+  }
+
+  const emailStatus = await verifyEmailConnection();
+
+  res.status(dbOk ? 200 : 503).json({
+    ok: dbOk,
+    database: dbOk ? 'connected' : 'error',
+    emailConfigured: isEmailConfigured(),
+    email: emailStatus
+  });
 });
 
 // Create Application
 app.post('/api/applications', async (req, res) => {
   try {
-    const { 
-      applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, 
-      course_intended, academic_history, hobbies, achievements, address, email, 
-      phone_number, password, 
+    const {
+      applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college,
+      course_intended, academic_history, hobbies, achievements, address, email,
+      phone_number, password,
       receives_help, help_details, has_scholarship, scholarship_details,
       old_border, old_border_details, relative_in_hostel, relative_details,
       applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
       utr_number
     } = req.body;
 
+    if (!email || !phone_number || !password || !applicant_name) {
+      return res.status(400).json({ error: 'Missing required application fields.' });
+    }
+
     // Check if phone number already exists
-    const userCheck = await pool.query('SELECT * FROM applicants WHERE phone_number = $1 OR email = $2', [phone_number, email]);
+    const userCheck = await pool.query(
+      'SELECT * FROM applicants WHERE phone_number = $1 OR email = $2',
+      [phone_number, email]
+    );
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ error: 'This Phone Number or Email already exists with us.' });
     }
@@ -72,17 +193,17 @@ app.post('/api/applications', async (req, res) => {
          relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
          payment_id, payment_status) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29) RETURNING id`,
-      [applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended, 
-       JSON.stringify(academic_history), hobbies, achievements, address, email, phone_number, passwordHash,
-       receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
-       relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
-       utr_number || null, 'pending']
+      [applicant_name, guardian_name, dob, blood_group, gothram, annual_income, expected_college, course_intended,
+        JSON.stringify(academic_history), hobbies, achievements, address, email, phone_number, passwordHash,
+        receives_help, help_details, has_scholarship, scholarship_details, old_border, old_border_details,
+        relative_in_hostel, relative_details, applied_other_hostel, other_hostel_details, contagious_disease, disease_details,
+        utr_number || null, 'pending']
     );
 
     const applicationId = newApplicant.rows[0].id;
 
     // Fetch settings for WhatsApp link
-    let whatsappLink = 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t'; // Default fallback
+    let whatsappLink = 'https://chat.whatsapp.com/E8UIqxH9zZEjErc6ING5x?mode=gi_t';
     try {
       const settingsResult = await pool.query('SELECT value FROM settings WHERE key = $1', ['whatsapp_group_link']);
       if (settingsResult.rows.length > 0) {
@@ -92,100 +213,30 @@ app.post('/api/applications', async (req, res) => {
       console.error('Failed to fetch WhatsApp link from settings:', settingsErr.message);
     }
 
-    // Send Confirmation Email
-    try {
-      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        const mailOptions = {
-          from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
-          to: email,
-          subject: 'Application Submitted & Payment Pending Verification - Malkala Hostel',
-          html: `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; margin: 0; text-align: center;">
-              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;">
-                
-                <!-- Header -->
-                <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px;">MALAKALA HOSTEL</h1>
-                  <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 14px;">M. S. S. V. Dharmasamsthe</p>
-                </div>
+    // Send Confirmation Email (never blocks application success)
+    const attachments = await buildPdfAttachment(req.body, applicant_name);
+    const mailResult = await sendEmail({
+      to: email,
+      subject: 'Application Submitted & Payment Pending Verification - Malkala Hostel',
+      html: buildApplicationConfirmationHtml({
+        applicant_name,
+        guardian_name,
+        expected_college,
+        course_intended,
+        phone_number,
+        whatsappLink
+      }),
+      attachments
+    });
 
-                <!-- Body -->
-                <div style="padding: 40px 30px;">
-                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Application Received! 🎉</h2>
-                  <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
-                    Dear <strong style="color: #1e293b;">${applicant_name}</strong>,<br><br>
-                    Thank you for choosing Malakala Hostel. Your official application has been successfully recorded within our system. Our trustees will review your details shortly.
-                  </p>
-
-                  <!-- Details Card -->
-                  <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-                    <h3 style="color: #0f172a; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Application Summary</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-                      <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-weight: 500; width: 40%;">Applicant:</td>
-                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${applicant_name}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Guardian Name:</td>
-                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${guardian_name}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Expected College:</td>
-                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${expected_college}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Intended Course:</td>
-                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${course_intended}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Phone Number:</td>
-                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600;">${phone_number}</td>
-                      </tr>
-                    </table>
-                  </div>
-
-                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                    We will notify you directly regarding the next steps, including seat allotment procedures. If you have any questions, feel free to contact the administration.
-                  </p>
-
-                  <!-- WhatsApp Group Link -->
-                  <div style="background-color: #dcfce7; border: 2px solid #22c55e; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
-                    <p style="color: #166534; font-size: 15px; margin: 0 0 12px 0; font-weight: 500;">💬 Join Our WhatsApp Group</p>
-                    <a href="${whatsappLink}" style="display: inline-block; background-color: #22c55e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background-color 0.3s;">
-                      Join WhatsApp Group
-                    </a>
-                    <p style="color: #166534; font-size: 13px; margin: 12px 0 0 0;">Stay updated with important announcements and hostel news</p>
-                  </div>
-
-                </div>
-
-                <!-- Footer -->
-                <div style="background-color: #f1f5f9; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-                  <p style="margin: 0; color: #64748b; font-size: 13px;">
-                    <strong>Malakala Hostel Administration</strong><br>
-                    Bengaluru-560019
-                  </p>
-                </div>
-
-              </div>
-            </div>
-          `,
-          attachments: [
-            {
-              filename: `Application_${applicant_name.replace(/\s+/g, '_')}.pdf`,
-              content: generateApplicationPDF(req.body)
-            }
-          ]
-        };
-        await transporter.sendMail(mailOptions);
-      }
-    } catch (mailErr) {
-      console.error('Email failed to send:', mailErr.message);
+    if (!mailResult.success) {
+      console.error(`Application #${applicationId} saved but confirmation email failed for ${email}:`, mailResult.error);
     }
 
-    res.status(201).json({ 
-      success: true, 
-      id: applicationId
+    res.status(201).json({
+      success: true,
+      id: applicationId,
+      emailSent: Boolean(mailResult.success)
     });
   } catch (err) {
     console.error(err.message);
@@ -198,7 +249,7 @@ app.post('/api/applications', async (req, res) => {
 app.post('/api/auth/applicant', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and Password are required.' });
     }
@@ -217,19 +268,20 @@ app.post('/api/auth/applicant', async (req, res) => {
 
     // Remove password hash before sending back
     delete applicant.password_hash;
-    
+
     res.json({ success: true, applicant });
   } catch (err) {
     console.error('Login error:', err.message);
     res.status(500).json({ error: 'Server error while authenticating' });
   }
 });
+
 // Admin Panel Fetch
 app.get('/api/applications', async (req, res) => {
   const adminKey = req.headers['x-admin-key'];
   const masterKey = process.env.ADMIN_PASSWORD || 'malkala123';
   const donorKey = process.env.DONOR_PASSWORD || 'donor123';
-  
+
   if (adminKey === masterKey) {
     try {
       const allApplicants = await pool.query('SELECT *, payment_status, payment_id, created_at FROM applicants ORDER BY created_at DESC');
@@ -273,26 +325,24 @@ app.put('/api/applications/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   const key = req.headers['x-admin-key'];
-  
+
   try {
     if (key === (process.env.ADMIN_PASSWORD || 'malkala123') && status === 'sent_to_donor') {
-      await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2", [status, id]);
+      await pool.query('UPDATE applicants SET selection_status = $1 WHERE id = $2', [status, id]);
       res.json({ success: true, status });
-    } 
+    }
     else if (key === (process.env.DONOR_PASSWORD || 'donor123') && (status === 'selected_by_donor' || status === 'rejected_by_donor')) {
-      const result = await pool.query("UPDATE applicants SET selection_status = $1 WHERE id = $2 RETURNING *", [status, id]);
+      const result = await pool.query('UPDATE applicants SET selection_status = $1 WHERE id = $2 RETURNING *', [status, id]);
       const appData = result.rows[0];
-      
+
       // dispatch email
-      try {
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-          const isSelected = status === 'selected_by_donor';
-          const subjectText = isSelected ? 'Application Selected! - Malkala Hostel' : 'Update regarding your Application - Malkala Hostel';
-          const htmlContent = isSelected 
-          ? `
+      const isSelected = status === 'selected_by_donor';
+      const subjectText = isSelected ? 'Application Selected! - Malkala Hostel' : 'Update regarding your Application - Malkala Hostel';
+      const htmlContent = isSelected
+        ? `
               <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; padding: 40px 30px;">
-                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Congratulations, ${appData.applicant_name}! 🌟</h2>
+                  <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Congratulations, ${appData.applicant_name}!</h2>
                   <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
                     We are thrilled to inform you that your application has been successfully selected by our donors for admission to Malkala Hostel!
                   </p>
@@ -301,7 +351,7 @@ app.put('/api/applications/:id/status', async (req, res) => {
                   </p>
                 </div>
               </div>`
-          : `
+        : `
               <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; padding: 40px 30px;">
                   <h2 style="color: #1e293b; font-size: 22px; margin-top: 0; margin-bottom: 20px;">Application Update</h2>
@@ -317,24 +367,22 @@ app.put('/api/applications/:id/status', async (req, res) => {
                 </div>
               </div>`;
 
-          const mailOptions = {
-            from: `"Malkala Hostel" <${process.env.EMAIL_USER}>`,
-            to: appData.email,
-            subject: subjectText,
-            html: htmlContent
-          };
-          await transporter.sendMail(mailOptions);
-        }
-      } catch (e) {
-        console.error('Failed to send status update email:', e);
+      const mailResult = await sendEmail({
+        to: appData.email,
+        subject: subjectText,
+        html: htmlContent
+      });
+
+      if (!mailResult.success) {
+        console.error(`Status email failed for application #${id}:`, mailResult.error);
       }
-      
-      res.json({ success: true, status });
+
+      res.json({ success: true, status, emailSent: Boolean(mailResult.success) });
     }
     else {
       res.status(401).json({ error: 'Unauthorized to perform this action.' });
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e.message);
     res.status(500).json({ error: 'Server error updating status' });
   }
@@ -346,7 +394,7 @@ app.get('/api/settings', async (req, res) => {
     const result = await pool.query('SELECT key, value FROM settings');
     const settings = {};
     result.rows.forEach(row => settings[row.key] = row.value);
-    
+
     // Default values if empty
     if (Object.keys(settings).length === 0) {
       return res.json({
@@ -406,20 +454,27 @@ app.post('/api/settings', async (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  
   app.use(express.static(path.join(__dirname, '../dist')));
-  
+
   app.use((req, res) => {
     res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
   });
 }
 
 pool.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS selection_status VARCHAR(50) DEFAULT 'pending'")
-  .then(() => console.log("Schema check passed: selection_status column available"))
-  .catch((err) => console.log("DB Schema Check Exception:", err.message));
+  .then(() => console.log('Schema check passed: selection_status column available'))
+  .catch((err) => console.log('DB Schema Check Exception:', err.message));
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+
+  const emailStatus = await verifyEmailConnection();
+  if (emailStatus.ok) {
+    console.log(`Email service OK: ${emailStatus.reason}`);
+  } else {
+    console.error('Email service NOT ready — applicants will NOT receive emails.');
+    console.error(`  Reason: ${emailStatus.reason}${emailStatus.detail ? ` | ${emailStatus.detail}` : ''}`);
+    console.error('  Fix: set EMAIL_USER (Gmail) + EMAIL_PASS (16-char Google App Password) in production env vars.');
+    console.error('  Create App Password: https://myaccount.google.com/apppasswords');
+  }
 });
